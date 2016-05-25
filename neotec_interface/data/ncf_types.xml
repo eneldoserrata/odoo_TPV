@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="ncf_type_end_consumer" model="neotec_interface.ncf_type">
+            <field name="name">Consumidor Final</field>
+            <field name="serie">A</field>
+            <field name="ttr">02</field>
+        </record>
+
+        <record id="ncf_type_fiscal_credit" model="neotec_interface.ncf_type">
+            <field name="name">Crédito Fiscal</field>
+            <field name="serie">A</field>
+            <field name="ttr">01</field>
+        </record>
+
+        <record id="ncf_type_governmental" model="neotec_interface.ncf_type">
+            <field name="name">Gubernamental</field>
+            <field name="serie">A</field>
+            <field name="ttr">15</field>
+        </record>
+
+        <record id="ncf_type_special_regime" model="neotec_interface.ncf_type">
+            <field name="name">Régimen Especial</field>
+            <field name="serie">A</field>
+            <field name="ttr">14</field>
+        </record>
+
+        <record id="ncf_type_credit_note" model="neotec_interface.ncf_type">
+            <field name="name">Nota de Crédito</field>
+            <field name="serie">A</field>
+            <field name="ttr">04</field>
+        </record>
+
+    </data>
+</openerp>

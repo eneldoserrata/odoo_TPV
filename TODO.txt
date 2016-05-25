@@ -1,0 +1,6 @@
+Implementar Recargos y Descuentos
+
+Para los recargos se tomara la diferencia entre el precio original del articulo y el precio modificado en el POS
+si el precio luego de es mayor al original entonces se creara un item como recargo, por el contrario entonces se creara un item como descuento
+
+Tambien se pueden hacer descuento en base al porcentaje en el item, entonces se creara un nuevo item como descuento con el precio igual al porcentaje seleccionado del precio original.

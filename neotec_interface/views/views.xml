@@ -1,0 +1,130 @@
+<openerp>
+  <data>
+
+    <record model="ir.ui.view" id="neotec_interface.fiscal_printer_form">
+      <field name="name">neotec_interface.fiscal_printer_form</field>
+      <field name="model">neotec_interface.fiscal_printer</field>
+      <field name="arch" type="xml">
+        <form string="Impresora Fiscal">
+            <sheet>
+
+                 <notebook>
+                    <page string="Impresora">
+                         <group col="4">
+                            <field name="name"/>
+                            <field name="bd"/>
+                            <field name="ep"/>
+                            <field name="ia"/>
+                            <field name="invoice_directory"/>
+                            <field name="copy_quantity"/>
+                            <field name="description"/>
+                        </group>
+                    </page>
+                    <page string="Configuración NCF">
+                        <field name="ncf_range_ids">
+                            <tree editable="top">
+                                <field name="ncf_type_id" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                                <field name="total_quantity"/>
+                                <field name="used_quantity"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="neotec_interface.fiscal_printer_tree">
+      <field name="name">neotec_interface.fiscal_printer_tree</field>
+      <field name="model">neotec_interface.fiscal_printer</field>
+      <field name="arch" type="xml">
+        <tree string="Impresora Fiscal">
+            <field name="name"/>
+            <field name="description"/>
+            <field name="bd"/>
+            <field name="ep"/>
+            <field name="ia"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="neotec_interface.ncf_type_tree">
+      <field name="name">neotec_interface.ncf_type</field>
+      <field name="model">neotec_interface.ncf_type</field>
+      <field name="arch" type="xml">
+        <tree string="Tipos de NCF">
+            <field name="name"/>
+            <field name="serie"/>
+            <field name="ttr"/>
+        </tree>
+      </field>
+    </record>
+
+
+      <!--Add Fiscal Printer select to pos.config view-->
+    <record id="inherit_pos_config" model="ir.ui.view">
+        <field name="name">pos.config.form.view</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_config_form"/>
+        <field name="view_type">form</field>
+
+        <field name="arch" type="xml">
+
+          <xpath expr="//sheet//group[@name='features']" position="after">
+              <group string="Impresoras Fiscales">
+                      <field name="fiscal_printer_id"/>
+              </group>
+          </xpath>
+
+        </field>
+    </record>
+
+    <record id="custom_partner_form" model="ir.ui.view">
+      <field name="name">res.partner</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="view_type">form</field>
+      <field name="arch" type="xml">
+        <field name="name" position="after">
+            <field name="vat" placeholder="RNC/Cédula"/>
+        </field>
+
+        <notebook>
+            <page name="Fiscal" string="Fiscal">
+                <group col="4">
+                    <field name="ncf_type_id" options="{'no_create': True, 'no_open': True, 'no_create_edit': True}"/>
+                </group>
+            </page>
+        </notebook>
+
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="neotec_interface.fiscal_printer_action">
+      <field name="name">Impresoras Fiscales</field>
+      <field name="res_model">neotec_interface.fiscal_printer</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="neotec_interface.ncf_type_action">
+      <field name="name">Tipos de NCF</field>
+      <field name="res_model">neotec_interface.ncf_type</field>
+      <field name="view_mode">tree</field>
+    </record>
+
+    <!-- Top menu item -->
+    <menuitem name="Neotec Interface" id="neotec_interface.menu_root"/>
+
+    <!-- menu categories -->
+
+    <menuitem name="General" id="neotec_interface.menu_1" parent="neotec_interface.menu_root"/>
+    <!-- actions -->
+    <menuitem name="Impresoras Fiscales" id="neotec_interface.menu_1_op_1" parent="neotec_interface.menu_1"
+              action="neotec_interface.fiscal_printer_action"/>
+
+    <menuitem name="Tipos de NCF" id="neotec_interface.menu_1_op_2" parent="neotec_interface.menu_1"
+              action="neotec_interface.ncf_type_action"/>
+
+  </data>
+</openerp>

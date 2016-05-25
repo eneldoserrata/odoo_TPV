@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+   <t t-extend="ClientDetailsEdit">
+        <t t-jquery=".edit">
+            var nameField = this.find(".client-name");
+            var nameFieldToInsert = nameField.clone();
+            var vatField = this.find(".vat");
+            var vatContainer = vatField.parent(); //Rnc
+            vatField = vatField.clone(); // Delete the reference, new field;
+            var countryContainer = this.find('.client-address-country').parent();
+
+            var leftContainer = this.find('.client-details-left');
+            var rightContainer = this.find('.client-details-right');
+
+            //Tax Receipt
+            var ncfTypeSelect  = $(document.createElement('select')).addClass('detail client-ncf-type');
+            ncfTypeSelect.attr("name","ncf_type_id");
+            var ncfTypeSelectContainer = $(document.createElement('div')).addClass('client-detail');
+            ncfTypeSelectContainer.append($(document.createElement('span')).addClass('label').text('NCF'));
+            ncfTypeSelectContainer.append(ncfTypeSelect);
+
+            // Dom Manipulation
+            nameFieldToInsert.removeClass('client-name');
+            vatContainer.remove();
+            vatField.addClass('client-name')
+            vatField.attr('placeholder','RNC/Cédula')
+            nameField.replaceWith(vatField);
+            countryContainer.remove();
+
+            var newNameContainer  = $(document.createElement('div')).addClass('client-detail');
+            newNameContainer.append($(document.createElement('span')).addClass('label').text('Name'))
+            .append(nameFieldToInsert);
+
+            leftContainer.prepend(newNameContainer);
+            rightContainer.prepend(countryContainer);
+            rightContainer.append(ncfTypeSelectContainer);
+
+        </t>
+    </t>
+
+    <t t-extend="ClientDetails">
+        <t t-jquery=".client-details">
+            this.find('.client-details-right .client-detail:nth-child(2) .label').text("RNC");
+        </t>
+    </t>
+
+</templates>
