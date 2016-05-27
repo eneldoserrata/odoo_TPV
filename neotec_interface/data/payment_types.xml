@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="payment_type_cash" model="neotec_interface.payment_type">
+            <field name="name">PagoEfectivo</field>
+            <field name="code">0</field>
+        </record>
+
+        <record id="payment_type_check" model="neotec_interface.payment_type">
+            <field name="name">PagoCheque</field>
+            <field name="code">1</field>
+        </record>
+
+        <record id="payment_type_credit_card" model="neotec_interface.payment_type">
+            <field name="name">PagoTarjetaCredito</field>
+            <field name="code">2</field>
+        </record>
+
+        <record id="payment_type_debit_card" model="neotec_interface.payment_type">
+            <field name="name">PagoTarjetaDebito</field>
+            <field name="code">3</field>
+        </record>
+
+         <record id="payment_type_own_card" model="neotec_interface.payment_type">
+            <field name="name">PagoTarjetaPropia</field>
+             <field name="code">4</field>
+        </record>
+
+         <record id="payment_type_voucher" model="neotec_interface.payment_type">
+            <field name="name">PagoCupon</field>
+             <field name="code">5</field>
+        </record>
+
+         <record id="payment_type_other_1" model="neotec_interface.payment_type">
+            <field name="name">PagoOtros1</field>
+             <field name="code">6</field>
+        </record>
+
+        <record id="payment_type_other_2" model="neotec_interface.payment_type">
+            <field name="name">PagoOtros2</field>
+            <field name="code">7</field>
+        </record>
+
+        <record id="payment_type_other_3" model="neotec_interface.payment_type">
+            <field name="name">PagoOtros3</field>
+            <field name="code">8</field>
+        </record>
+
+        <record id="payment_type_other_4" model="neotec_interface.payment_type">
+            <field name="name">PagoOtros4</field>
+            <field name="code">9</field>
+        </record>
+
+        <record id="payment_type_credit_note" model="neotec_interface.payment_type">
+            <field name="name">PagoNotaDeCredito</field>
+            <field name="code">10</field>
+        </record>
+    </data>
+</openerp>

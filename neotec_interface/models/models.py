@@ -103,3 +103,9 @@ class CustomPartner(models.Model):
                 print 'Error code: ', e.code
             return " "
 
+
+class PaymentType(models.Model):
+    _name = 'neotec_interface.payment_type'
+    name = fields.Char(string=u"Título", required=True)
+    account_journal_id  = fields.Many2one("account.journal",string="Tipo de Pago")
+    code = fields.Integer(string=u"Código", readonly=True)

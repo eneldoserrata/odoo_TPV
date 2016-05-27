@@ -150,7 +150,6 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     invoice.copyQty = fiscalPrinter.copy_quantity;
                     invoice.directory = fiscalPrinter.invoice_directory;
 
-//                     TODO Obtener datos de la impresora actual siendo utilizada
 //                     TODO Machear metodos de pagos en Odoo POS con metodos pago Impresora
 
 //                    invoice.subTotal = currentOrder.get_total_without_tax();
