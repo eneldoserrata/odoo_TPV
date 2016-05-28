@@ -132,48 +132,44 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
             FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
 
+                var invoice = new neotec_interface_models.Invoice();
+                invoice.office = fiscalPrinter.ep;
+                invoice.box = fiscalPrinter.ia;
+                invoice.copyQty = fiscalPrinter.copy_quantity;
+                invoice.directory = fiscalPrinter.invoice_directory;
+
+                _.each(currentOrderItems, function(item) {
+                    invoice.items.push(new neotec_interface_models.Item(item ,item.product.display_name, item.price, item.quantity, item.discount));
+                });
+
 
                 if(client != null)
                 {
-                    ResPartner.query(['ncf_type_id']).filter([['id','=',client.id]]).first().then(function(partners){
-                        var ncf_type = partners[0].ncf_type_id; //0: Id, 1: Name
 
-                        var invoice = {clientName: client.name, ncfTypeId: ncf_type[0]};
+                    ResPartner.query(['ncf_type_id']).filter([['id','=',client.id]]).first().then(function(partner){
+                        var ncfType = partner.ncf_type_id; //0: Id, 1: Name
+
+                        invoice.client = new neotec_interface_models.Client(client.name, client.vat);
+                        invoice.ncf_type_id = ncfType[0];
+
+                        FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
+                            console.log(invoice);
+                        });
 
                     });
                 }
                 else
                 {
-                    var invoice = new neotec_interface_models.Invoice();
-                    invoice.office = fiscalPrinter.ep;
-                    invoice.box = fiscalPrinter.ia;
-                    invoice.copyQty = fiscalPrinter.copy_quantity;
-                    invoice.directory = fiscalPrinter.invoice_directory;
+                    //Query Final Consumer NcfTypeId
+                    NcfType.query(['id']).filter([['ttr','=','2']]).first().then(function(ncfType){
 
-//                     TODO Machear metodos de pagos en Odoo POS con metodos pago Impresora
+                        invoice.ncf_type_id = ncfType.id;
 
-//                    invoice.subTotal = currentOrder.get_total_without_tax();
-//                    invoice.total = currentOrder.get_total_with_tax();
-//                    invoice.paidTotal = currentOrder.get_total_paid();
-
-                    _.each(currentOrderItems, function(item) {
-
-                        invoice.push(new neotec_interface_models.Item(item ,item.product.display_name, item.price, item.quantity, item.discount));
+                        FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
+                            console.log(invoice);
+                        });
 
                     });
-
-                    FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
-
-                    });
-
-
-
-                    console.log(currentOrder);
-                    console.log(neotec_interface_models.Invoice);
-
-
-
-                    console.log(currentOrderItems);
                 }
 
             });

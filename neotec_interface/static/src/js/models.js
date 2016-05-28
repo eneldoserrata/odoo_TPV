@@ -3,7 +3,6 @@ neotec_interface_models = (function(){
     var Client = function(name, rnc, address) {
         this.name = name || ''; // Buyer Social Reason
         this.rnc = rnc || ''; // Buyer RNC
-        this.address = address || '';
     };
 
     var Item = function(type, description, price, quantity, discount) {
@@ -14,8 +13,9 @@ neotec_interface_models = (function(){
         this.discount = discount || ''
     };
 
-    var Invoice = function(type, client) {
+    var Invoice = function(type, client) { // TODO In case of Credit Note the 'type' will be sent from the frontend
         this.type = type || '';
+        this.ncf_type_id = '';// Ncf type
         this.copyQty = '';
         this.logo = ''
         this.density = ''

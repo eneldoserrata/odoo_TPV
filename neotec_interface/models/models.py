@@ -34,13 +34,30 @@ class FiscalPrinter(models.Model):
 
     @api.model
     def register_invoice(self, invoice):
-
         if invoice:
-            directory = invoice['directory']
+
+            invoice['density'] = ''
+            invoice['logo'] = ''
+            ncf_type = self.env['neotec_interface.ncf_type'].browse(invoice['ncf_type_id'])
+
+            if ncf_type:
+                if ncf_type.ttr == 1: # Fiscal Credit
+                    invoice['type'] = '2'
+                elif ncf_type.ttr == 15: # Governmental
+                    invoice['type'] = '2'
+                elif ncf_type.ttr == 14: # Special Regime
+                    invoice['type'] = '6'
+                elif ncf_type.ttr == 4: #TODO In case of Credit Note the 'type' will be sent from the frontend
+                    pass
+                else: # Final Consumer ttr = 2
+                    invoice['type'] = '1'
+
+
             now = datetime.now() # TODO Fix timezone .astimezone(pytz.timezone('America/Santo_Domingo'))
+            now = now.replace(hour=now.hour - 4) # Temporary Fix
             file_name = str(now)
             file_name = file_name[:file_name.index('.')]
-            f = open(directory +'/'+file_name, 'w')
+            f = open(invoice['directory'] +'/'+file_name, 'w')
             formatted_invoice = neoutil.format_invoice(invoice)
             f.write(formatted_invoice)
             f.close()
