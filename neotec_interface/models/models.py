@@ -57,6 +57,10 @@ class FiscalPrinter(models.Model):
             now = now.replace(hour=now.hour - 4) # Temporary Fix
             file_name = str(now)
             file_name = file_name[:file_name.index('.')]
+			
+			if not os.path.exists(invoice['directory']):
+				os.makedirs(invoice['directory'])
+			
             f = open(invoice['directory'] +'/'+file_name, 'w')
             formatted_invoice = neoutil.format_invoice(invoice)
             f.write(formatted_invoice)
