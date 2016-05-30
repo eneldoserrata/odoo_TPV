@@ -5,6 +5,14 @@ neotec_interface_models = (function(){
         this.rnc = rnc || ''; // Buyer RNC
     };
 
+    var NCF = function() {
+        this.serie = '';
+        this.bd = ''; // Business Division
+        this.office = '';
+        this.box = '';
+        this.ncfTypeId = '';// Ncf type
+    };
+
     var Item = function(type, description, price, quantity, discount) {
         this.type = type || '';
         this.description = description || '';
@@ -15,13 +23,10 @@ neotec_interface_models = (function(){
 
     var Invoice = function(type, client) { // TODO In case of Credit Note the 'type' will be sent from the frontend
         this.type = type || '';
-        this.ncf_type_id = '';// Ncf type
         this.copyQty = '';
         this.logo = ''
         this.density = ''
-        this.office = ''
-        this.box = '',
-        this.ncf = '',
+        this.ncf = null,
         this.client = client || null;
         this.referenceNcf = ''
         this.discount = '';
@@ -43,12 +48,14 @@ neotec_interface_models = (function(){
 
         this.items = []
         this.directory = '';
+        this.fiscalPrinterId = '';
     };
 
     var exports = {
         Client: Client,
         Item: Item,
-        Invoice: Invoice
+        Invoice: Invoice,
+        NCF: NCF
     };
 
     return exports;

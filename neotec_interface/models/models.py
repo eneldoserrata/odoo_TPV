@@ -34,23 +34,39 @@ class FiscalPrinter(models.Model):
 
     @api.model
     def register_invoice(self, invoice):
+
         if invoice:
 
             invoice['density'] = ''
             invoice['logo'] = ''
-            ncf_type = self.env['neotec_interface.ncf_type'].browse(invoice['ncf_type_id'])
+            invoice['ncf']['bd'] = str(invoice['ncf']['bd']).zfill(2)
+            invoice['ncf']['office'] = str(invoice['ncf']['office']).zfill(3)
+            invoice['ncf']['box'] = str(invoice['ncf']['box']).zfill(3)
+            invoice['copyQty'] = str(invoice['copyQty'])
 
-            if ncf_type:
-                if ncf_type.ttr == 1: # Fiscal Credit
-                    invoice['type'] = '2'
-                elif ncf_type.ttr == 15: # Governmental
-                    invoice['type'] = '2'
-                elif ncf_type.ttr == 14: # Special Regime
-                    invoice['type'] = '6'
-                elif ncf_type.ttr == 4: #TODO In case of Credit Note the 'type' will be sent from the frontend
-                    pass
-                else: # Final Consumer ttr = 2
-                    invoice['type'] = '1'
+            ncf_type = self.env['neotec_interface.ncf_type'].browse(invoice['ncf']['ncfTypeId'])
+
+            if ncf_type.ttr == 1: # Fiscal Credit
+                invoice['type'] = '2'
+            elif ncf_type.ttr == 15: # Governmental
+                invoice['type'] = '2'
+            elif ncf_type.ttr == 14: # Special Regime
+                invoice['type'] = '6'
+            elif ncf_type.ttr == 4: #TODO In case of Credit Note the 'type' will be sent from the frontend
+                pass
+            else: # Final Consumer ttr = 2
+                invoice['type'] = '1'
+
+            sequence = ''
+
+            # ncf_range = self.env['neotec_interface.ncf_range'].search([('fiscal_printer_id', '=', invoice['fiscalPrinterId']),
+            #                                                ('ncf_type_id', '=', invoice['ncf']['ncfTypeId'])])
+
+
+            sequence = '1'.zfill(8)
+            ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + invoice['type'].zfill(2) + sequence
+
+            invoice['ncfString'] = ncf
 
             now = datetime.now() # TODO Fix timezone .astimezone(pytz.timezone('America/Santo_Domingo'))
             now = now.replace(hour=now.hour - 4) # Temporary Fix

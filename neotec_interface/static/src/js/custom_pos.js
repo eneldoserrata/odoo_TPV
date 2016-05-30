@@ -133,10 +133,15 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
 
                 var invoice = new neotec_interface_models.Invoice();
-                invoice.office = fiscalPrinter.ep;
-                invoice.box = fiscalPrinter.ia;
+                var ncf = new neotec_interface_models.NCF();
+
+                invoice.fiscalPrinterId = fiscalPrinterId;
                 invoice.copyQty = fiscalPrinter.copy_quantity;
                 invoice.directory = fiscalPrinter.invoice_directory;
+                ncf.office = fiscalPrinter.ep;
+                ncf.box = fiscalPrinter.ia;
+                ncf.bd = fiscalPrinter.bd;
+
 
                 _.each(currentOrderItems, function(item) {
                     invoice.items.push(new neotec_interface_models.Item(item ,item.product.display_name, item.price, item.quantity, item.discount));
@@ -150,7 +155,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                         var ncfType = partner.ncf_type_id; //0: Id, 1: Name
 
                         invoice.client = new neotec_interface_models.Client(client.name, client.vat);
-                        invoice.ncf_type_id = ncfType[0];
+                        ncf.ncfTypeId = ncfType[0];
+                        invoice.ncf = ncf;
 
                         FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
                             console.log(invoice);
@@ -163,7 +169,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     //Query Final Consumer NcfTypeId
                     NcfType.query(['id']).filter([['ttr','=','2']]).first().then(function(ncfType){
 
-                        invoice.ncf_type_id = ncfType.id;
+                        ncf.ncfTypeId = ncfType.id;
+                        invoice.ncf = ncf;
 
                         FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
                             console.log(invoice);

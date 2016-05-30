@@ -16,8 +16,7 @@ def format_invoice(invoice):
     :return formatted string representation of the invoice according to Neotec Invoice Format
     :param invoice.
     """
-    formatted_invoice = ''
 
+    formatted_invoice = invoice['type'] + '||' + invoice['copyQty'] + '||' + invoice['logo'] + '||' + invoice['density'] + '||' + invoice['ncf']['office'] + '||' + invoice['ncf']['box'] + '||' + invoice['ncfString']
 
-
-    return "Testing"
+    return formatted_invoice
