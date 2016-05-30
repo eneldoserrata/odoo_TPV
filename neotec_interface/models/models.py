@@ -3,7 +3,7 @@ import json
 import os
 import urllib2
 from datetime import datetime
-from neotec_interface.neoutil import neoutil
+from ..neoutil import neoutil
 from pprint import pprint
 import pytz
 
@@ -52,15 +52,14 @@ class FiscalPrinter(models.Model):
                 else: # Final Consumer ttr = 2
                     invoice['type'] = '1'
 
-
             now = datetime.now() # TODO Fix timezone .astimezone(pytz.timezone('America/Santo_Domingo'))
             now = now.replace(hour=now.hour - 4) # Temporary Fix
             file_name = str(now)
             file_name = file_name[:file_name.index('.')]
-			
-			if not os.path.exists(invoice['directory']):
-				os.makedirs(invoice['directory'])
-			
+
+            if not os.path.exists(invoice['directory']):
+                os.mkdir(invoice['directory'])
+
             f = open(invoice['directory'] +'/'+file_name, 'w')
             formatted_invoice = neoutil.format_invoice(invoice)
             f.write(formatted_invoice)
