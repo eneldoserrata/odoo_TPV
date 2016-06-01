@@ -26,6 +26,7 @@
         # 'security/ir.model.access.csv',
         'data/ncf_types.xml',
         'data/payment_types.xml',
+        'data/products.xml',
         'views/views.xml',
         'views/templates.xml',
     ],

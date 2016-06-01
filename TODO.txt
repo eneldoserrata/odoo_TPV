@@ -1,6 +1,15 @@
-Implementar Recargos y Descuentos
+---Implementar Recargos y Descuentos
 
 Para los recargos se tomara la diferencia entre el precio original del articulo y el precio modificado en el POS
 si el precio luego de es mayor al original entonces se creara un item como recargo, por el contrario entonces se creara un item como descuento
 
 Tambien se pueden hacer descuento en base al porcentaje en el item, entonces se creara un nuevo item como descuento con el precio igual al porcentaje seleccionado del precio original.
+
+--- Validaciones
+
+Prevenir guardar la secuencia de NCFs en caso de que la cantidad restante sea menor o igual a 0
+
+
+--- Terminaciones
+
+Poner pretty el popup en caso de que no queden secuencias de ncfs en el pos

@@ -138,13 +138,34 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 invoice.fiscalPrinterId = fiscalPrinterId;
                 invoice.copyQty = fiscalPrinter.copy_quantity;
                 invoice.directory = fiscalPrinter.invoice_directory;
+                invoice.comments = self.pos.config.receipt_footer;
                 ncf.office = fiscalPrinter.ep;
                 ncf.box = fiscalPrinter.ia;
                 ncf.bd = fiscalPrinter.bd;
 
 
                 _.each(currentOrderItems, function(item) {
-                    invoice.items.push(new neotec_interface_models.Item(item ,item.product.display_name, item.price, item.quantity, item.discount));
+                    var itemType = 1;
+
+                    if(item.product.display_name == "Recargo")
+                    {
+                        itemType = 4;
+                    }
+
+                    var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantity, item.product.taxes_id[0]);
+
+                    invoice.items.push(fiscalItem);
+
+
+                    if(item.discount > 0) // push other item with the original price and set the discuented amount as price to the current item
+                    {
+                        var discountItem = _.clone(fiscalItem);
+
+                        discountItem.type = 3;
+                        discountItem.price = neotec_interface_models.roundTo2(discountItem.price * item.discount / 100);
+                        invoice.items.push(discountItem); // add discount item
+                    }
+
                 });
 
 
@@ -180,9 +201,6 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 }
 
             });
-
-
-
 
         }
 

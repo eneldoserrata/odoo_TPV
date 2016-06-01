@@ -1,5 +1,9 @@
 neotec_interface_models = (function(){
 
+    var roundTo2 = function(n) {
+        return Math.round(n * 100) / 100;
+    }
+
     var Client = function(name, rnc, address) {
         this.name = name || ''; // Buyer Social Reason
         this.rnc = rnc || ''; // Buyer RNC
@@ -13,12 +17,13 @@ neotec_interface_models = (function(){
         this.ncfTypeId = '';// Ncf type
     };
 
-    var Item = function(type, description, price, quantity, discount) {
+    var Item = function(type, description, price, quantity, taxId) {
         this.type = type || '';
+        this.quantity = quantity || '';
         this.description = description || '';
         this.price = price || '';
-        this.quantity = quantity || '';
-        this.discount = discount || ''
+        this.tax = '';
+        this.taxId = taxId || '';
     };
 
     var Invoice = function(type, client) { // TODO In case of Credit Note the 'type' will be sent from the frontend
@@ -55,7 +60,8 @@ neotec_interface_models = (function(){
         Client: Client,
         Item: Item,
         Invoice: Invoice,
-        NCF: NCF
+        NCF: NCF,
+        roundTo2: roundTo2
     };
 
     return exports;

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="product_charge" model="product.product">
+            <field name="name">Recargo</field>
+            <field name="sale_ok">true</field>
+            <field name="type">consu</field>
+            <field name="list_price">1</field>
+            <field name="available_in_pos">true</field>
+        </record>
+    </data>
+</openerp>

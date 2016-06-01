@@ -3,6 +3,8 @@ import json
 import os
 import urllib2
 from datetime import datetime
+
+from openerp.exceptions import ValidationError
 from ..neoutil import neoutil
 from pprint import pprint
 import pytz
@@ -31,7 +33,6 @@ class FiscalPrinter(models.Model):
 
         return super(FiscalPrinter, self).create(cr, uid, vals, context=context)
 
-
     @api.model
     def register_invoice(self, invoice):
 
@@ -43,6 +44,16 @@ class FiscalPrinter(models.Model):
             invoice['ncf']['office'] = str(invoice['ncf']['office']).zfill(3)
             invoice['ncf']['box'] = str(invoice['ncf']['box']).zfill(3)
             invoice['copyQty'] = str(invoice['copyQty'])
+
+            if invoice['client'] is None:
+                invoice['client'] = {'name': '', 'rnc': ''}
+
+            for item in invoice['items']:
+                tax = self.env['account.tax'].browse(item['taxId'])
+                item['tax'] = str(tax.amount).replace('.', '') + '0'
+                item['price'] = str(item['price'])
+                item['quantity'] = str(item['quantity'])
+                item['type'] = str(item['type'])
 
             ncf_type = self.env['neotec_interface.ncf_type'].browse(invoice['ncf']['ncfTypeId'])
 
@@ -59,11 +70,16 @@ class FiscalPrinter(models.Model):
 
             sequence = ''
 
-            # ncf_range = self.env['neotec_interface.ncf_range'].search([('fiscal_printer_id', '=', invoice['fiscalPrinterId']),
-            #                                                ('ncf_type_id', '=', invoice['ncf']['ncfTypeId'])])
+            ncf_range = self.env['neotec_interface.ncf_range'].search([('fiscal_printer_id', '=', invoice['fiscalPrinterId']),
+                                                           ('ncf_type_id', '=', invoice['ncf']['ncfTypeId'])])
 
+            if ncf_range.remaining_quantity <= 0:
+                raise ValidationError("No le quedan NCFs \""+ncf_type.name+"\", realize su solicitud")
 
-            sequence = '1'.zfill(8)
+            next_range = ncf_range.used_quantity + 1
+            ncf_range.used_quantity = next_range
+            sequence = str(next_range).zfill(8)
+
             ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + invoice['type'].zfill(2) + sequence
 
             invoice['ncfString'] = ncf
@@ -81,13 +97,20 @@ class FiscalPrinter(models.Model):
             f.write(formatted_invoice)
             f.close()
 
+
 class NCFRange(models.Model):
     _name = 'neotec_interface.ncf_range'
 
     total_quantity = fields.Integer(string="Cantidad", required=True)
     used_quantity = fields.Integer(string="Usados", required=True)
+    remaining_quantity = fields.Integer(compute="_compute_remaining", string="Restantes")
     ncf_type_id = fields.Many2one("neotec_interface.ncf_type",string="Tipo NCF", required=True)
     fiscal_printer_id = fields.Many2one("neotec_interface.fiscal_printer", string="Impresora")
+
+    @api.one
+    @api.depends('used_quantity', 'total_quantity')
+    def _compute_remaining(self):
+        self.remaining_quantity = self.total_quantity - self.used_quantity
 
 
 class NCF(models.Model):
