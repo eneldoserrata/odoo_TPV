@@ -20,13 +20,14 @@ class FiscalPrinter(models.Model):
     copy_quantity = fields.Integer(string="Cantidad Copias", default=0)
     description = fields.Text(string=u"Descripción")
     bd = fields.Integer(string=u"División de Negocios", required=True)
-    ep = fields.Integer(string="Sucursal", required=True) #Punto de Emisión
-    ia = fields.Integer(string="Caja", required=True) #Area de Impresión
-    charge_legal_tip = fields.Boolean(string="Cargar Propina Legal", default=False, help="Carga 10% de propina legal a la cuenta del cliente en el modulo de restaurantes")
+    ep = fields.Integer(string="Sucursal", required=True)  # Punto de Emisión
+    ia = fields.Integer(string="Caja", required=True)  # Area de Impresión
+    charge_legal_tip = fields.Boolean(string="Cargar Propina Legal", default=False,
+                                      help="Carga 10% de propina legal a la cuenta del cliente en el modulo de restaurantes")
 
-    ncf_range_ids = fields.One2many("neotec_interface.ncf_range","fiscal_printer_id","Secuencias de NCF")
+    ncf_range_ids = fields.One2many("neotec_interface.ncf_range", "fiscal_printer_id", "Secuencias de NCF")
 
-    def create(self,cr,uid, vals, context=None):
+    def create(self, cr, uid, vals, context=None):
         invoice_dir = vals.get("invoice_directory", False)
 
         if not os.path.exists(invoice_dir):
@@ -61,45 +62,76 @@ class FiscalPrinter(models.Model):
                 item['quantity'] = str(item['quantity'])
                 item['type'] = str(item['type'])
 
+            for payment in invoice['payments']:
+                payment_type = self.env['neotec_interface.payment_type'].search(
+                    [['account_journal_id', '=', payment['id']]])
+
+                payment['amount'] = str(payment['amount'])
+
+                if payment_type.code == 0:
+                    invoice['effectivePayment'] = payment['amount']
+                elif payment_type.code == 1:
+                    invoice['checkPayment'] = payment['amount']
+                elif payment_type.code == 2:
+                    invoice['creditCardPayment'] = payment['amount']
+                elif payment_type.code == 3:
+                    invoice['debitCardPayment'] = payment['amount']
+                elif payment_type.code == 4:
+                    invoice['ownCardPayment'] = payment['amount']
+                elif payment_type.code == 5:
+                    invoice['voucherPayment'] = payment['amount']
+                elif payment_type.code == 6:
+                    invoice['other1Payment'] = payment['amount']
+                elif payment_type.code == 7:
+                    invoice['other2Payment'] = payment['amount']
+                elif payment_type.code == 8:
+                    invoice['other3Payment'] = payment['amount']
+                elif payment_type.code == 9:
+                    invoice['other4Payment'] = payment['amount']
+                elif payment_type.code == 10:
+                    invoice['creditNotePayment'] = payment['amount']
+
             ncf_type = self.env['neotec_interface.ncf_type'].browse(invoice['ncf']['ncfTypeId'])
 
-            if ncf_type.ttr == 1: # Fiscal Credit
+            if ncf_type.ttr == 1:  # Fiscal Credit
                 invoice['type'] = '2'
-            elif ncf_type.ttr == 15: # Governmental
+            elif ncf_type.ttr == 15:  # Governmental
                 invoice['type'] = '2'
-            elif ncf_type.ttr == 14: # Special Regime
+            elif ncf_type.ttr == 14:  # Special Regime
                 invoice['type'] = '6'
-            elif ncf_type.ttr == 4: #TODO In case of Credit Note the 'type' will be sent from the frontend
+            elif ncf_type.ttr == 4:  # TODO In case of Credit Note the 'type' will be sent from the frontend
                 pass
-            else: # Final Consumer ttr = 2
+            else:  # Final Consumer ttr = 2
                 invoice['type'] = '1'
 
             sequence = ''
 
-            ncf_range = self.env['neotec_interface.ncf_range'].search([('fiscal_printer_id', '=', invoice['fiscalPrinterId']),
-                                                           ('ncf_type_id', '=', invoice['ncf']['ncfTypeId'])])
+            ncf_range = self.env['neotec_interface.ncf_range'].search(
+                [('fiscal_printer_id', '=', invoice['fiscalPrinterId']),
+                 ('ncf_type_id', '=', invoice['ncf']['ncfTypeId'])])
 
             if ncf_range.remaining_quantity <= 0:
-                raise ValidationError("No le quedan NCFs \""+ncf_type.name+"\", realize su solicitud")
+                raise ValidationError("No le quedan NCFs \"" + ncf_type.name + "\", realize su solicitud")
 
             next_range = ncf_range.used_quantity + 1
             ncf_range.used_quantity = next_range
             sequence = str(next_range).zfill(8)
 
-            ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + invoice['type'].zfill(2) + sequence
+            ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + invoice[
+                'type'].zfill(2) + sequence
 
             invoice['ncfString'] = ncf
 
             pprint(invoice)
 
-            now = datetime.now() # TODO Fix timezone .astimezone(pytz.timezone('America/Santo_Domingo'))
+            now = datetime.now()  # TODO Fix timezone .astimezone(pytz.timezone('America/Santo_Domingo'))
             file_name = str(now)
             file_name = file_name[:file_name.index('.')]
 
             if not os.path.exists(invoice['directory']):
                 os.mkdir(invoice['directory'])
 
-            f = open(invoice['directory'] +'/'+file_name, 'w')
+            f = open(invoice['directory'] + '/' + file_name, 'w')
             formatted_invoice = neoutil.format_invoice(invoice)
             f.write(formatted_invoice)
             f.close()
@@ -111,7 +143,7 @@ class NCFRange(models.Model):
     total_quantity = fields.Integer(string="Cantidad", required=True)
     used_quantity = fields.Integer(string="Usados", required=True)
     remaining_quantity = fields.Integer(compute="_compute_remaining", string="Restantes")
-    ncf_type_id = fields.Many2one("neotec_interface.ncf_type",string="Tipo NCF", required=True)
+    ncf_type_id = fields.Many2one("neotec_interface.ncf_type", string="Tipo NCF", required=True)
     fiscal_printer_id = fields.Many2one("neotec_interface.fiscal_printer", string="Impresora")
 
     @api.one
@@ -124,7 +156,7 @@ class NCF(models.Model):
     _name = 'neotec_interface.ncf'
 
     name = fields.Char(string="Sequencia")
-    fiscal_printer_id = fields.Many2one("neotec_interface.fiscal_printer",string="Impresora")
+    fiscal_printer_id = fields.Many2one("neotec_interface.fiscal_printer", string="Impresora")
     ncf_type_id = fields.Many2one("neotec_interface.ncf_type")
 
 
@@ -139,7 +171,7 @@ class POSConfigWithFiscalPrinter(models.Model):
     _name = 'pos.config'
     _inherit = 'pos.config'
 
-    fiscal_printer_id = fields.Many2one("neotec_interface.fiscal_printer","Impresora Fiscal")
+    fiscal_printer_id = fields.Many2one("neotec_interface.fiscal_printer", "Impresora Fiscal")
 
 
 class CustomPartner(models.Model):
@@ -151,15 +183,15 @@ class CustomPartner(models.Model):
     @api.onchange('vat')
     def get_rnc(self):
         try:
-            if(self.vat):
-                res = urllib2.urlopen('http://api.marcos.do/rnc/'+self.vat)
+            if (self.vat):
+                res = urllib2.urlopen('http://api.marcos.do/rnc/' + self.vat)
                 if res.code == 200:
-					company = json.load(res)
-					if 'comercial_name' in company:
-						if(len(company['comercial_name']) != 1):
-							self.name = company['comercial_name']
-						else:
-							self.name = company['name']
+                    company = json.load(res)
+                    if 'comercial_name' in company:
+                        if (len(company['comercial_name']) != 1):
+                            self.name = company['comercial_name']
+                        else:
+                            self.name = company['name']
         except urllib2.URLError as e:
             if hasattr(e, 'reason'):
                 print 'We failed to reach a server.'
@@ -173,5 +205,5 @@ class CustomPartner(models.Model):
 class PaymentType(models.Model):
     _name = 'neotec_interface.payment_type'
     name = fields.Char(string=u"Título", required=True)
-    account_journal_id  = fields.Many2one("account.journal",string="Tipo de Pago")
+    account_journal_id = fields.Many2one("account.journal", string="Tipo de Pago")
     code = fields.Integer(string=u"Código", readonly=True)

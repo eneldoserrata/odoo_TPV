@@ -173,6 +173,9 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
                 });
 
+                currentOrder.paymentlines.forEach(function(paymentLine){
+                    invoice.payments.push(new neotec_interface_models.Payment(paymentLine.cashregister.journal.id, paymentLine.amount));
+                });
 
                 if(client != null)
                 {

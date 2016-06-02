@@ -4,6 +4,11 @@ neotec_interface_models = (function(){
         return Math.round(n * 100) / 100;
     }
 
+    var Payment = function(id, amount) {
+        this.id = id || '';
+        this.amount = amount || '';
+    };
+
     var Client = function(name, rnc, address) {
         this.name = name || ''; // Buyer Social Reason
         this.rnc = rnc || ''; // Buyer RNC
@@ -51,7 +56,8 @@ neotec_interface_models = (function(){
         this.other4Payment = '';
         this.creditNotePayment = '';
 
-        this.items = []
+        this.items = [];
+        this.payments = [];
         this.directory = '';
         this.fiscalPrinterId = '';
     };
@@ -61,6 +67,7 @@ neotec_interface_models = (function(){
         Item: Item,
         Invoice: Invoice,
         NCF: NCF,
+        Payment: Payment,
         roundTo2: roundTo2
     };
 
