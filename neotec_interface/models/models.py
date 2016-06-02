@@ -25,6 +25,10 @@ class FiscalPrinter(models.Model):
     charge_legal_tip = fields.Boolean(string="Cargar Propina Legal", default=False,
                                       help="Carga 10% de propina legal a la cuenta del cliente en el modulo de restaurantes")
 
+    ftp_user = fields.Char(string="Usuario")
+    ftp_pwd = fields.Char(string=u"Contraseña")
+    ftp_ip = fields.Char(string=u"Dirección Terminar Impresión")
+
     ncf_range_ids = fields.One2many("neotec_interface.ncf_range", "fiscal_printer_id", "Secuencias de NCF")
 
     def create(self, cr, uid, vals, context=None):
@@ -59,14 +63,14 @@ class FiscalPrinter(models.Model):
                     tax_amount = tax.amount
                 item['tax'] = str(tax_amount).replace('.', '') + '0'
                 item['price'] = str(item['price'])
-                item['quantity'] = str(item['quantity'])
+                item['quantity'] = item['quantity'].replace('.', '')
                 item['type'] = str(item['type'])
 
             for payment in invoice['payments']:
                 payment_type = self.env['neotec_interface.payment_type'].search(
                     [['account_journal_id', '=', payment['id']]])
 
-                payment['amount'] = str(payment['amount'])
+                payment['amount'] = '{:.2f}'.format(payment['amount']).replace('.', '')
 
                 if payment_type.code == 0:
                     invoice['effectivePayment'] = payment['amount']
@@ -117,8 +121,8 @@ class FiscalPrinter(models.Model):
             ncf_range.used_quantity = next_range
             sequence = str(next_range).zfill(8)
 
-            ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + invoice[
-                'type'].zfill(2) + sequence
+            ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + str(
+                ncf_type.ttr).zfill(2) + sequence
 
             invoice['ncfString'] = ncf
 

@@ -17,3 +17,11 @@ Poner pretty el popup en caso de que no queden secuencias de ncfs en el pos
 -- Guia
 
 Se debe configurar un item como item para propina con el nombre de "Propina"
+En fast-food activar opcion incluir impuesto en el precio.
+
+
+---  NOTa
+
+Agregar 3 ceros decimales a la cantidad, agregar 2 ceros decimales al pago
+
+No coincide tipo comprobante con el ncf

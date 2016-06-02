@@ -129,6 +129,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             var fiscalPrinterId = this.pos.config.fiscal_printer_id[0];
             var currentOrderItems = currentOrder.get_orderlines();
 
+            console.log(currentOrder);
+
             FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia','charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
 
                 var invoice = new neotec_interface_models.Invoice();
@@ -157,7 +159,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                         return;
                     }
 
-                    var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantity, item.product.taxes_id[0]);
+                    var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantityStr, item.product.taxes_id[0]);
 
                     invoice.items.push(fiscalItem);
 
