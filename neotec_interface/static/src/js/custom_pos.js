@@ -6,12 +6,21 @@ odoo.define('neotec_interface.custom_pos', function (require) {
     var Model = require('web.DataModel');
     var core = require('web.core');
     var _t = core._t;
+    var isChargingLegalTip = false;
 
     chrome.Chrome.include({
 
         loading_hide: function(){
             this._super();
             console.log(_t("Trabajando Fiscal!"));
+
+            var FiscalPrinter = new Model("neotec_interface.fiscal_printer");
+            var fiscalPrinterId = this.pos.config.fiscal_printer_id[0];
+
+            FiscalPrinter.query(['charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
+                isChargingLegalTip = fiscalPrinter.charge_legal_tip;
+            });
+
         }
 
     });
@@ -215,6 +224,44 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         }
 
 
+    });
+
+    screens.OrderWidget.include({
+
+        renderElement: function(scrollbottom) {
+            var self = this;
+            this._super(scrollbottom);
+
+            console.log('Abriendo orden');
+
+            if(isChargingLegalTip)
+            {
+                var line = document.createElement('div');
+                line.className +='subentry';
+                line.textContent = _t('Propina Legal (10%)');
+
+                var value = document.createElement('span');
+                value.className +='value';
+                value.textContent = this.format_currency(0);
+
+                line.appendChild(value);
+
+                console.log(this.el);
+                // TODO call this at the right time
+//                this.el.querySelector('.summary .total').appendChild(line);
+            }
+        },
+
+        update_summary: function() {
+            var self = this;
+            this._super();
+
+            if(isChargingLegalTip)
+            {
+
+            }
+            console.log('item anadido')
+        }
     });
 
 });

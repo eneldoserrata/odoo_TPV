@@ -22,6 +22,4 @@ En fast-food activar opcion incluir impuesto en el precio.
 
 ---  NOTa
 
-Agregar 3 ceros decimales a la cantidad, agregar 2 ceros decimales al pago
-
-No coincide tipo comprobante con el ncf
+En caso del 10% de ley agregar un item temporal con valor del 10% de la factura y luego removerlo de los items
