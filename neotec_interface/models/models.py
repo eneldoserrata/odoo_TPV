@@ -22,6 +22,7 @@ class FiscalPrinter(models.Model):
     bd = fields.Integer(string=u"División de Negocios", required=True)
     ep = fields.Integer(string="Sucursal", required=True) #Punto de Emisión
     ia = fields.Integer(string="Caja", required=True) #Area de Impresión
+    charge_legal_tip = fields.Boolean(string="Cargar Propina Legal", default=False, help="Carga 10% de propina legal a la cuenta del cliente en el modulo de restaurantes")
 
     ncf_range_ids = fields.One2many("neotec_interface.ncf_range","fiscal_printer_id","Secuencias de NCF")
 
@@ -44,13 +45,18 @@ class FiscalPrinter(models.Model):
             invoice['ncf']['office'] = str(invoice['ncf']['office']).zfill(3)
             invoice['ncf']['box'] = str(invoice['ncf']['box']).zfill(3)
             invoice['copyQty'] = str(invoice['copyQty'])
+            invoice['tip'] = str(invoice['tip'])
 
             if invoice['client'] is None:
                 invoice['client'] = {'name': '', 'rnc': ''}
 
             for item in invoice['items']:
                 tax = self.env['account.tax'].browse(item['taxId'])
-                item['tax'] = str(tax.amount).replace('.', '') + '0'
+                # if item doesnt have tax, 18% is default
+                tax_amount = 18.0
+                if tax:
+                    tax_amount = tax.amount
+                item['tax'] = str(tax_amount).replace('.', '') + '0'
                 item['price'] = str(item['price'])
                 item['quantity'] = str(item['quantity'])
                 item['type'] = str(item['type'])
@@ -84,8 +90,9 @@ class FiscalPrinter(models.Model):
 
             invoice['ncfString'] = ncf
 
+            pprint(invoice)
+
             now = datetime.now() # TODO Fix timezone .astimezone(pytz.timezone('America/Santo_Domingo'))
-            now = now.replace(hour=now.hour - 4) # Temporary Fix
             file_name = str(now)
             file_name = file_name[:file_name.index('.')]
 

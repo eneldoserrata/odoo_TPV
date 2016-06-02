@@ -13,3 +13,7 @@ Prevenir guardar la secuencia de NCFs en caso de que la cantidad restante sea me
 --- Terminaciones
 
 Poner pretty el popup en caso de que no queden secuencias de ncfs en el pos
+
+-- Guia
+
+Se debe configurar un item como item para propina con el nombre de "Propina"

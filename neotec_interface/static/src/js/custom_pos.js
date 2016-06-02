@@ -129,8 +129,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             var fiscalPrinterId = this.pos.config.fiscal_printer_id[0];
             var currentOrderItems = currentOrder.get_orderlines();
 
-
-            FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
+            FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia','charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
 
                 var invoice = new neotec_interface_models.Invoice();
                 var ncf = new neotec_interface_models.NCF();
@@ -139,6 +138,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 invoice.copyQty = fiscalPrinter.copy_quantity;
                 invoice.directory = fiscalPrinter.invoice_directory;
                 invoice.comments = self.pos.config.receipt_footer;
+                invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
                 ncf.office = fiscalPrinter.ep;
                 ncf.box = fiscalPrinter.ia;
                 ncf.bd = fiscalPrinter.bd;
@@ -150,6 +150,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     if(item.product.display_name == "Recargo")
                     {
                         itemType = 4;
+                    }
+                    else if(item.product.display_name == "Propina")
+                    {
+                        invoice.tip = item.price;
+                        return;
                     }
 
                     var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantity, item.product.taxes_id[0]);
@@ -180,7 +185,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                         invoice.ncf = ncf;
 
                         FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
-                            console.log(invoice);
+                            //do nothing
                         });
 
                     });
@@ -194,7 +199,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                         invoice.ncf = ncf;
 
                         FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
-                            console.log(invoice);
+                            //do nothing
                         });
 
                     });

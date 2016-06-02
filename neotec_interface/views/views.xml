@@ -18,6 +18,7 @@
                             <field name="invoice_directory"/>
                             <field name="copy_quantity"/>
                             <field name="description"/>
+                            <field name="charge_legal_tip"/>
                         </group>
                     </page>
                     <page string="Configuración NCF">
