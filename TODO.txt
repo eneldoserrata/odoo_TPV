@@ -22,4 +22,4 @@ En fast-food activar opcion incluir impuesto en el precio.
 
 ---  NOTa
 
-En caso del 10% de ley agregar un item temporal con valor del 10% de la factura y luego removerlo de los items
+Agregar campo propinal legal a orden en backend

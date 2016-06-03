@@ -3,10 +3,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
     var chrome = require('point_of_sale.chrome');
     var screens = require('point_of_sale.screens');
+    var posModels = require('point_of_sale.models');
     var Model = require('web.DataModel');
     var core = require('web.core');
     var _t = core._t;
-    var isChargingLegalTip = false;
+    var isChargingLegalTip = null;
 
     chrome.Chrome.include({
 
@@ -232,23 +233,12 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             var self = this;
             this._super(scrollbottom);
 
-            console.log('Abriendo orden');
-
-            if(isChargingLegalTip)
+            if(isChargingLegalTip != null)
             {
-                var line = document.createElement('div');
-                line.className +='subentry';
-                line.textContent = _t('Propina Legal (10%)');
-
-                var value = document.createElement('span');
-                value.className +='value';
-                value.textContent = this.format_currency(0);
-
-                line.appendChild(value);
-
-                console.log(this.el);
-                // TODO call this at the right time
-//                this.el.querySelector('.summary .total').appendChild(line);
+                if(!isChargingLegalTip)
+                {
+                    $('#legalTip').hide();
+                }
             }
         },
 
@@ -258,10 +248,30 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
             if(isChargingLegalTip)
             {
+                var order = this.pos.get_order();
+                var total = order ? order.get_total_without_tax() : 0;
+                var legalTip = total * 0.10;
 
+                var legalTipLine = $('#legalTip');
+                legalTipLine.find('span').text(this.format_currency(legalTip));
             }
-            console.log('item anadido')
+
         }
     });
+
+    // Change Order get_total_with_tax return if legal tip is enabled
+    posModels.Order.prototype.get_total_with_tax = function() {
+
+        if(isChargingLegalTip)
+        {
+            var subtotal = this.get_total_without_tax();
+            var legalTip = subtotal * 0.10;
+            var totalWithLegalTip = subtotal + legalTip;
+
+            return totalWithLegalTip;
+        }
+
+        return this.get_total_without_tax() + this.get_total_tax();
+    };
 
 });

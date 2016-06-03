@@ -44,4 +44,15 @@
         </t>
     </t>
 
+    <t t-extend="OrderWidget">
+        <t t-jquery=".summary .total">
+
+            var entryLine = $(document.createElement('div')).addClass('subentry').text('Propina Legal (10%): ').attr('id', 'legalTip');
+            var entryValue = $(document.createElement('span')).addClass('value').text('0.00€');
+            entryLine.append(entryValue);
+
+            this.append(entryLine);
+        </t>
+    </t>
+
 </templates>
