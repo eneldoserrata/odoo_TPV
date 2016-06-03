@@ -13,15 +13,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
         loading_hide: function(){
             this._super();
-            console.log(_t("Trabajando Fiscal!"));
-
             var FiscalPrinter = new Model("neotec_interface.fiscal_printer");
             var fiscalPrinterId = this.pos.config.fiscal_printer_id[0];
-
             FiscalPrinter.query(['charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
                 isChargingLegalTip = fiscalPrinter.charge_legal_tip;
             });
-
         }
 
     });
@@ -265,10 +261,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         if(isChargingLegalTip)
         {
             var subtotal = this.get_total_without_tax();
-            var legalTip = subtotal * 0.10;
-            var totalWithLegalTip = subtotal + legalTip;
+            var legalTip = neotec_interface_models.roundTo2(subtotal * 0.10);
+            var total_with_tax = subtotal + this.get_total_tax();
+            var total = total_with_tax + legalTip;
 
-            return totalWithLegalTip;
+            return total;
         }
 
         return this.get_total_without_tax() + this.get_total_tax();
