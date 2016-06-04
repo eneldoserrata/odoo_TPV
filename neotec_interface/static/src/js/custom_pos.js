@@ -240,16 +240,26 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
         update_summary: function() {
             var self = this;
-            this._super();
 
             if(isChargingLegalTip)
             {
                 var order = this.pos.get_order();
-                var total = order ? order.get_total_without_tax() : 0;
-                var legalTip = total * 0.10;
+                if (!order.get_orderlines().length) {
+                    return;
+                }
 
-                var legalTipLine = $('#legalTip');
-                legalTipLine.find('span').text(this.format_currency(legalTip));
+                var total = order ? order.get_total_with_tax() : 0;
+                var taxes = order ? order.get_total_tax() : 0; // fixed to get only the tax
+                var total_without_tax = order ? order.get_total_without_tax() : 0;
+                var legalTip = total_without_tax * 0.10;
+
+                this.el.querySelector('.summary .total > .value').textContent = this.format_currency(total);
+                this.el.querySelector('.summary .total .subentry .value').textContent = this.format_currency(taxes);
+                this.el.querySelector('#legalTip > span').textContent = this.format_currency(legalTip);
+            }
+            else
+            {
+                this._super();
             }
 
         }
