@@ -126,6 +126,13 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             var self = this;
             this._super(force_validation);
 
+            var order = this.pos.get_order();
+
+            if(!order.is_paid())
+            {
+                return;
+            }
+
             var NcfType = new Model("neotec_interface.ncf_type");
             var ResPartner = new Model("res.partner");
             var FiscalPrinter = new Model("neotec_interface.fiscal_printer");
@@ -135,7 +142,6 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             var fiscalPrinterId = this.pos.config.fiscal_printer_id[0];
             var currentOrderItems = currentOrder.get_orderlines();
 
-            console.log(currentOrder);
 
             FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia','charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
 

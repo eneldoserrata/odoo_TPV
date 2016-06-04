@@ -23,8 +23,6 @@ def format_invoice(invoice):
 
     formatted_invoice += '\n'
 
-    import pprint;pprint.pprint(formatted_invoice)
-
     # items
     for item in invoice['items']:
         formatted_invoice += item['type'] + '||' + item['quantity'] + '||' + item['description'] + '||' + item['price'] + '||' + item['tax'] + '\n'

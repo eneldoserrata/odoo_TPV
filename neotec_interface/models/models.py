@@ -128,9 +128,7 @@ class FiscalPrinter(models.Model):
 
             pprint(invoice)
 
-            now = datetime.now()  # TODO Fix timezone .astimezone(pytz.timezone('America/Santo_Domingo'))
-            file_name = str(now)
-            file_name = file_name[:file_name.index('.')]
+            file_name = str(ncf)
 
             if not os.path.exists(invoice['directory']):
                 os.mkdir(invoice['directory'])
