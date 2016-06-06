@@ -55,4 +55,12 @@
         </t>
     </t>
 
+    <t t-extend="Chrome">
+        <t t-jquery=".pos-rightheader" t-operation="append">
+            <div class="oe_status" id="credit_note_option">
+                <i class="fa fa-book oe_icon oe_orange" aria-hidden="true"></i>
+            </div>
+        </t>
+    </t>
+
 </templates>

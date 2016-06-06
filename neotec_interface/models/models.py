@@ -2,15 +2,15 @@
 import json
 import os
 import urllib2
-from datetime import datetime
-
+try:
+    from paramiko import SSHException
+except ImportError:
+    pass
 from openerp.exceptions import ValidationError
 from ..neoutil import neoutil
-from pprint import pprint
-import pytz
 
 from openerp import models, fields, api
-
+from pprint import pprint
 
 class FiscalPrinter(models.Model):
     _name = 'neotec_interface.fiscal_printer'
@@ -61,6 +61,8 @@ class FiscalPrinter(models.Model):
                 tax_amount = 18.0
                 if tax:
                     tax_amount = tax.amount
+                if tax_amount == 0: # no tax applicable for this item
+                    tax_amount = 1000
                 item['tax'] = str(tax_amount).replace('.', '') + '0'
                 item['price'] = str(item['price'])
                 item['quantity'] = item['quantity'].replace('.', '')
@@ -124,9 +126,10 @@ class FiscalPrinter(models.Model):
             ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + str(
                 ncf_type.ttr).zfill(2) + sequence
 
-            invoice['ncfString'] = ncf
+            current_order = self.env['pos.order'].search([('pos_reference','=',invoice['orderReference'])])
+            current_order.ncf = ncf
 
-            pprint(invoice)
+            invoice['ncfString'] = ncf
 
             file_name = str(ncf)
 
@@ -137,6 +140,20 @@ class FiscalPrinter(models.Model):
             formatted_invoice = neoutil.format_invoice(invoice)
             f.write(formatted_invoice)
             f.close()
+
+            fiscal_printer = self.env['neotec_interface.fiscal_printer'].browse(invoice['fiscalPrinterId'])
+
+            ftp_conf = {'ftp_user': fiscal_printer.ftp_user, 'ftp_pwd': fiscal_printer.ftp_pwd,
+                        'ftp_ip': fiscal_printer.ftp_ip}
+
+            path_parts = fiscal_printer.invoice_directory.split('/')
+            last_dir = path_parts[len(path_parts) - 1]
+            remote_path_conf = {'path': last_dir, 'file_name': ncf}
+
+            # try:
+            neoutil.send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf)
+            # except SSHException:
+            #     raise ValidationError("No se pudo conectar con la terminar de impresión")
 
 
 class NCFRange(models.Model):
@@ -209,3 +226,11 @@ class PaymentType(models.Model):
     name = fields.Char(string=u"Título", required=True)
     account_journal_id = fields.Many2one("account.journal", string="Tipo de Pago")
     code = fields.Integer(string=u"Código", readonly=True)
+
+
+class CustomPosOrder(models.Model):
+    _name = 'pos.order'
+    _inherit = 'pos.order'
+
+    legal_tip = fields.Monetary(string="Propina legal (10%)"),
+    ncf = fields.Char(string="NCF")

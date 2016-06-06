@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="neotec_interface.neotec_interface" model="ir.module.category">
+            <field name="name">Impresoras Fiscales</field>
+            <!--<field name="sequence" eval="1"/>-->
+        </record>
+
+        <record id="neotec_interface.normal_user" model="res.groups">
+            <field name="name">Usuario</field>
+            <field name="category_id" ref="neotec_interface.neotec_interface"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+
+        <record id="neotec_interface.admin_user" model="res.groups">
+            <field name="name">Administrador</field>
+            <field name="category_id" ref="neotec_interface.neotec_interface"/>
+            <field name="implied_ids" eval="[(4, ref('neotec_interface.normal_user'))]"/>
+        </record>
+
+    </data>
+</openerp>

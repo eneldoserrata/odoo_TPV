@@ -18,6 +18,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             FiscalPrinter.query(['charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
                 isChargingLegalTip = fiscalPrinter.charge_legal_tip;
             });
+
+            $('#credit_note_option').click(doCreditNote);
         }
 
     });
@@ -152,11 +154,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 invoice.copyQty = fiscalPrinter.copy_quantity;
                 invoice.directory = fiscalPrinter.invoice_directory;
                 invoice.comments = self.pos.config.receipt_footer;
+                invoice.orderReference = currentOrder.name; // gets the pos reference for the order
                 invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
                 ncf.office = fiscalPrinter.ep;
                 ncf.box = fiscalPrinter.ia;
                 ncf.bd = fiscalPrinter.bd;
-
 
                 _.each(currentOrderItems, function(item) {
                     var itemType = 1;
@@ -181,7 +183,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                         var discountItem = _.clone(fiscalItem);
 
                         discountItem.type = 3;
-                        discountItem.price = neotec_interface_models.roundTo2(discountItem.price * item.discount / 100);
+                        discountItem.price = neotec_interface_models.roundTo2((discountItem.price * item.quantity) * (item.discount / 100));
                         invoice.items.push(discountItem); // add discount item
                     }
 
@@ -286,5 +288,16 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
         return this.get_total_without_tax() + this.get_total_tax();
     };
+
+
+    var doCreditNote = function() {
+
+        window.posmodel.gui.show_popup('textinput',{
+            'title': 'Realizar nota de credito',
+            'confirm': function(){
+                console.log('Hecha');
+             }
+        });
+    }
 
 });

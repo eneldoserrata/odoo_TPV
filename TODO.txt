@@ -23,3 +23,11 @@ En fast-food activar opcion incluir impuesto en el precio.
 ---  NOTa
 
 Agregar campo propinal legal a orden en backend
+
+
+
+conf
+
+ip .122
+u pi
+c raspberry

@@ -23,6 +23,7 @@
 
     # always loaded
     'data': [
+        # 'security/groups.xml',
         # 'security/ir.model.access.csv',
         'data/ncf_types.xml',
         'data/payment_types.xml',
@@ -38,4 +39,7 @@
         'demo/demo.xml',
     ],
     'installable': True,
+    'external_dependencies': {
+        'python': ['paramiko']
+    }
 }
