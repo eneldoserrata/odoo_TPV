@@ -12,6 +12,7 @@ from ..neoutil import neoutil
 from openerp import models, fields, api
 from pprint import pprint
 
+
 class FiscalPrinter(models.Model):
     _name = 'neotec_interface.fiscal_printer'
 
@@ -126,7 +127,8 @@ class FiscalPrinter(models.Model):
             ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + str(
                 ncf_type.ttr).zfill(2) + sequence
 
-            current_order = self.env['pos.order'].search([('pos_reference','=',invoice['orderReference'])])
+            pprint(invoice['orderReference'])
+            current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])], limit=1)
             current_order.ncf = ncf
 
             invoice['ncfString'] = ncf
@@ -151,7 +153,7 @@ class FiscalPrinter(models.Model):
             remote_path_conf = {'path': last_dir, 'file_name': ncf}
 
             # try:
-            neoutil.send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf)
+            # neoutil.send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf)
             # except SSHException:
             #     raise ValidationError("No se pudo conectar con la terminar de impresión")
 

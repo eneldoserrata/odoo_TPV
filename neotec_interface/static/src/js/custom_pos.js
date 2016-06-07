@@ -122,115 +122,6 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         }
     });
 
-    screens.PaymentScreenWidget.include({
-
-        validate_order: function(force_validation){
-            var self = this;
-            this._super(force_validation);
-
-            var order = this.pos.get_order();
-
-            if(!order.is_paid())
-            {
-                return;
-            }
-
-            var NcfType = new Model("neotec_interface.ncf_type");
-            var ResPartner = new Model("res.partner");
-            var FiscalPrinter = new Model("neotec_interface.fiscal_printer");
-
-            var client = this.pos.get_client();
-            var currentOrder = this.pos.get_order();
-            var fiscalPrinterId = this.pos.config.fiscal_printer_id[0];
-            var currentOrderItems = currentOrder.get_orderlines();
-
-
-            FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia','charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
-
-                var invoice = new neotec_interface_models.Invoice();
-                var ncf = new neotec_interface_models.NCF();
-
-                invoice.fiscalPrinterId = fiscalPrinterId;
-                invoice.copyQty = fiscalPrinter.copy_quantity;
-                invoice.directory = fiscalPrinter.invoice_directory;
-                invoice.comments = self.pos.config.receipt_footer;
-                invoice.orderReference = currentOrder.name; // gets the pos reference for the order
-                invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
-                ncf.office = fiscalPrinter.ep;
-                ncf.box = fiscalPrinter.ia;
-                ncf.bd = fiscalPrinter.bd;
-
-                _.each(currentOrderItems, function(item) {
-                    var itemType = 1;
-
-                    if(item.product.display_name == "Recargo")
-                    {
-                        itemType = 4;
-                    }
-                    else if(item.product.display_name == "Propina")
-                    {
-                        invoice.tip = item.price;
-                        return;
-                    }
-
-                    var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantityStr, item.product.taxes_id[0]);
-
-                    invoice.items.push(fiscalItem);
-
-
-                    if(item.discount > 0) // push other item with the original price and set the discuented amount as price to the current item
-                    {
-                        var discountItem = _.clone(fiscalItem);
-
-                        discountItem.type = 3;
-                        discountItem.price = neotec_interface_models.roundTo2((discountItem.price * item.quantity) * (item.discount / 100));
-                        invoice.items.push(discountItem); // add discount item
-                    }
-
-                });
-
-                currentOrder.paymentlines.forEach(function(paymentLine){
-                    invoice.payments.push(new neotec_interface_models.Payment(paymentLine.cashregister.journal.id, paymentLine.amount));
-                });
-
-                if(client != null)
-                {
-
-                    ResPartner.query(['ncf_type_id']).filter([['id','=',client.id]]).first().then(function(partner){
-                        var ncfType = partner.ncf_type_id; //0: Id, 1: Name
-
-                        invoice.client = new neotec_interface_models.Client(client.name, client.vat);
-                        ncf.ncfTypeId = ncfType[0];
-                        invoice.ncf = ncf;
-
-                        FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
-                            //do nothing
-                        });
-
-                    });
-                }
-                else
-                {
-                    //Query Final Consumer NcfTypeId
-                    NcfType.query(['id']).filter([['ttr','=','2']]).first().then(function(ncfType){
-
-                        ncf.ncfTypeId = ncfType.id;
-                        invoice.ncf = ncf;
-
-                        FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
-                            //do nothing
-                        });
-
-                    });
-                }
-
-            });
-
-        }
-
-
-    });
-
     screens.OrderWidget.include({
 
         renderElement: function(scrollbottom) {
@@ -299,5 +190,109 @@ odoo.define('neotec_interface.custom_pos', function (require) {
              }
         });
     }
+
+    posModels.Order.prototype.finalize = function() {
+
+        validateFiscalInvoice();
+
+        this.destroy();
+    };
+
+    var validateFiscalInvoice = function () {
+
+        var pos = window.posmodel;
+
+        var NcfType = new Model("neotec_interface.ncf_type");
+        var ResPartner = new Model("res.partner");
+        var FiscalPrinter = new Model("neotec_interface.fiscal_printer");
+
+        var client = pos.get_client();
+        var currentOrder = pos.get_order();
+        var fiscalPrinterId = pos.config.fiscal_printer_id[0];
+        var currentOrderItems = currentOrder.get_orderlines();
+
+        FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia','charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
+
+            var invoice = new neotec_interface_models.Invoice();
+            var ncf = new neotec_interface_models.NCF();
+
+            invoice.fiscalPrinterId = fiscalPrinterId;
+            invoice.copyQty = fiscalPrinter.copy_quantity;
+            invoice.directory = fiscalPrinter.invoice_directory;
+            invoice.comments = pos.config.receipt_footer;
+            invoice.orderReference = currentOrder.name; // gets the pos reference for the order
+            invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
+            ncf.office = fiscalPrinter.ep;
+            ncf.box = fiscalPrinter.ia;
+            ncf.bd = fiscalPrinter.bd;
+
+            _.each(currentOrderItems, function(item) {
+                var itemType = 1;
+
+                if(item.product.display_name == "Recargo")
+                {
+                    itemType = 4;
+                }
+                else if(item.product.display_name == "Propina")
+                {
+                    invoice.tip = item.price;
+                    return;
+                }
+
+                var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantityStr, item.product.taxes_id[0]);
+
+                invoice.items.push(fiscalItem);
+
+
+                if(item.discount > 0) // push other item with the original price and set the discuented amount as price to the current item
+                {
+                    var discountItem = _.clone(fiscalItem);
+
+                    discountItem.type = 3;
+                    discountItem.price = neotec_interface_models.roundTo2((discountItem.price * item.quantity) * (item.discount / 100));
+                    invoice.items.push(discountItem); // add discount item
+                }
+
+            });
+
+            currentOrder.paymentlines.forEach(function(paymentLine){
+                invoice.payments.push(new neotec_interface_models.Payment(paymentLine.cashregister.journal.id, paymentLine.amount));
+            });
+
+            if(client != null)
+            {
+
+                ResPartner.query(['ncf_type_id']).filter([['id','=',client.id]]).first().then(function(partner){
+                    var ncfType = partner.ncf_type_id; //0: Id, 1: Name
+
+                    invoice.client = new neotec_interface_models.Client(client.name, client.vat);
+                    ncf.ncfTypeId = ncfType[0];
+                    invoice.ncf = ncf;
+
+                    FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
+                        //do nothing
+                    });
+
+                });
+            }
+            else
+            {
+                //Query Final Consumer NcfTypeId
+                NcfType.query(['id']).filter([['ttr','=','2']]).first().then(function(ncfType){
+
+                    ncf.ncfTypeId = ncfType.id;
+                    invoice.ncf = ncf;
+
+                    FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
+                        //do nothing
+                    });
+
+                });
+            }
+
+        });
+
+
+    };
 
 });
