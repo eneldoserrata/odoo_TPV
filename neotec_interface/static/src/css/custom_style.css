@@ -1,0 +1,20 @@
+
+.table-x th, .table-x td {
+    padding: 5px 2px;
+}
+
+.table-x tr {
+    background: rgb(230,230,230);
+}
+
+.table-x tr:nth-child(even) {
+    background: rgb(247,247,247);
+}
+
+.table-x > thead > tr {
+    background: rgba(110,200,155,0.83);
+}
+
+.table-x td {
+    font-size: 16px;
+}

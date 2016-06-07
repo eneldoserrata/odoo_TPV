@@ -3,7 +3,7 @@
     <data>
         <template id="assets_backend" name="custom_pos assets" inherit_id="point_of_sale.assets">
             <xpath expr="." position="inside">
-                <link type="text/css" rel="stylesheet" href="neotec_interface/static/src/css/font-awesome.min.css"/>
+                <link type="text/css" rel="stylesheet" href="neotec_interface/static/src/css/custom_style.css"/>
                 <script type="text/javascript" src="neotec_interface/static/src/js/models.js"></script>
                 <script type="text/javascript" src="neotec_interface/static/src/js/custom_pos.js"></script>
             </xpath>

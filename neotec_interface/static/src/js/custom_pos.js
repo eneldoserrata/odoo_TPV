@@ -3,6 +3,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
     var chrome = require('point_of_sale.chrome');
     var screens = require('point_of_sale.screens');
+    var gui = require('point_of_sale.gui');
+    var PopupWidget = require('point_of_sale.popups');
     var posModels = require('point_of_sale.models');
     var Model = require('web.DataModel');
     var core = require('web.core');
@@ -180,17 +182,6 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         return this.get_total_without_tax() + this.get_total_tax();
     };
 
-
-    var doCreditNote = function() {
-
-        window.posmodel.gui.show_popup('textinput',{
-            'title': 'Realizar nota de credito',
-            'confirm': function(){
-                console.log('Hecha');
-             }
-        });
-    }
-
     posModels.Order.prototype.finalize = function() {
 
         validateFiscalInvoice();
@@ -294,5 +285,60 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
 
     };
+
+
+    var doCreditNote = function() {
+        window.posmodel.gui.show_popup('creditnote',{
+            'title': 'Realizar nota de credito',
+            'confirm': function(){
+                console.log('Hecha');
+             }
+        });
+    };
+
+    var CreditNotePopupWidget = PopupWidget.extend({
+        template: 'CreditNotePopupWidget',
+
+        this_events: {
+            'keyup input': 'keyboard_used'
+        },
+
+        init: function(parent, args) {
+            this._super(parent, args);
+            this.options = {};
+            //events
+            for(var prop in this.this_events)
+            {
+                this.events[prop] = this.this_events[prop];
+            }
+        },
+
+        keyboard_used: function(e) {
+
+            switch(e.keyCode)
+            {
+                case 27: //ESC
+                    this.gui.close_popup();
+                break;
+            }
+        },
+
+        show: function(options){
+            options = options || {};
+            this._super(options);
+
+            this.renderElement();
+            this.$('input,textarea').focus();
+        },
+        click_confirm: function(){
+            var value = this.$('input,textarea').val();
+            this.gui.close_popup();
+            if( this.options.confirm ){
+                this.options.confirm.call(this,value);
+            }
+        },
+    });
+
+    gui.define_popup({name:'creditnote', widget: CreditNotePopupWidget});
 
 });

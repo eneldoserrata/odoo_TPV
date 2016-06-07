@@ -63,4 +63,53 @@
         </t>
     </t>
 
+    <t t-name="CreditNotePopupWidget">
+        <div class="modal-dialog">
+            <div class="popup popup-textinput">
+                <p class="title"><t t-esc=" widget.options.title || '' " /></p>
+                <input type='text' t-att-value="widget.options.value || ''" placeholder="NCF de la Factura"></input>
+                <div class="body touch-scrollable scrollable-y">
+                    <table class="table-x">
+                        <thead>
+                            <tr>
+                                <th>Ref Orden</th>
+                                <th>NCF</th>
+                                <th>Fecha</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td># 0000-10102-402</td>
+                                <td>A010010010200000101</td>
+                                <td>08/06/2016 15:28:45</td>
+                                <td>2000 RD$</td>
+                            </tr>
+                            <tr>
+                                <td># 0000-10102-402</td>
+                                <td>A010010010200000101</td>
+                                <td>08/06/2016 15:28:45</td>
+                                <td>2000 RD$</td>
+                            </tr>
+                            <tr>
+                                <td># 0000-10102-402</td>
+                                <td>A010010010200000101</td>
+                                <td>08/06/2016 15:28:45</td>
+                                <td>2000 RD$</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="footer">
+                    <div class="button confirm">
+                        Ok
+                    </div>
+                    <div class="button cancel">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
 </templates>
