@@ -1,4 +1,8 @@
 
+.table-x {
+    width: 100%;
+}
+
 .table-x th, .table-x td {
     padding: 5px 2px;
 }
@@ -11,10 +15,19 @@
     background: rgb(247,247,247);
 }
 
+.table-x > thead {
+    width: 100%;
+}
+
 .table-x > thead > tr {
     background: rgba(110,200,155,0.83);
 }
 
 .table-x td {
     font-size: 16px;
+}
+
+.table-x > tbody tr:hover {
+    background: #CECECE;
+    cursor: pointer;
 }

@@ -31,3 +31,7 @@ conf
 ip .122
 u pi
 c raspberry
+
+
+query pos.order for the current session
+Terminar las notas de credito

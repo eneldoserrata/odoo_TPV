@@ -23,8 +23,8 @@
 
     # always loaded
     'data': [
-        # 'security/groups.xml',
-        # 'security/ir.model.access.csv',
+        'security/groups.xml',
+        'security/ir.model.access.csv',
         'data/ncf_types.xml',
         'data/payment_types.xml',
         'data/products.xml',

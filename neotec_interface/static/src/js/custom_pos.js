@@ -290,27 +290,63 @@ odoo.define('neotec_interface.custom_pos', function (require) {
     var doCreditNote = function() {
         window.posmodel.gui.show_popup('creditnote',{
             'title': 'Realizar nota de credito',
-            'confirm': function(){
-                console.log('Hecha');
+            'confirm': function(value){
+
+                if(value != '')
+                {
+                    window.posmodel.gui.show_popup('creditnotevalidate',{
+                        'title': 'Realizar nota de credito',
+                        'ncf': value,
+                        'confirm': function(val){
+
+                         }
+                    });
+                }
+
              }
         });
     };
 
-    var CreditNotePopupWidget = PopupWidget.extend({
-        template: 'CreditNotePopupWidget',
+    var CreditNoteValidateWidget = PopupWidget.extend({
+        template: 'CreditNoteValidatePopupWidget',
 
         this_events: {
-            'keyup input': 'keyboard_used'
+            'keyup input': 'keyboard_used',
+            'click tbody tr': 'give_back_selected_item'
         },
 
         init: function(parent, args) {
             this._super(parent, args);
-            this.options = {};
             //events
             for(var prop in this.this_events)
             {
                 this.events[prop] = this.this_events[prop];
             }
+        },
+
+        loadOrder: function(ncf, callback) {
+
+            var PosOrder = new Model("pos.order");
+            var PosOrderLine = new Model("pos.order.line");
+
+            PosOrder.query(['id','pos_reference']).filter([['ncf', '=', ncf]]).first().then(function(order){
+
+                PosOrderLine.query(['product_id','price_unit','qty']).filter([['order_id','=', order.id]]).all().then(function(orderLines){
+
+                    _.each(orderLines, function(orderLine){
+                        orderLine.product = orderLine.product_id[1];
+                    });
+
+                    order.orderLines = orderLines;
+
+                    if(callback)
+                    {
+                        callback(order);
+                    }
+                });
+
+            });
+
         },
 
         keyboard_used: function(e) {
@@ -323,12 +359,137 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             }
         },
 
+
+        give_back_selected_item: function() {
+            console.log("todo: implement give_back_selected_item method");
+        },
+
         show: function(options){
+            var self = this;
+            options = options || {};
+            this._super(options);
+
+            this.renderElement();
+            var $tbody = this.$('tbody');
+
+            this.loadOrder(options.ncf, function(order){
+
+                _.each(order.orderLines, function(orderLine){
+
+                    var row = $('<tr>')
+                    .append($('<td>').text(orderLine.product))
+                    .append($('<td>').text(orderLine.qty))
+                    .append($('<td>').text(self.format_currency(orderLine.price_unit)))
+                    .append($('<td>').text(self.format_currency(orderLine.price_unit * orderLine.qty)));
+
+                    $tbody.append(row);
+
+                });
+
+            });
+
+        },
+
+        click_confirm: function(){
+            var value = this.$('input').val();
+            this.gui.close_popup();
+            if( this.options.confirm ){
+                this.options.confirm.call(this,value);
+            }
+        }
+    });
+
+    gui.define_popup({name:'creditnotevalidate', widget: CreditNoteValidateWidget});
+
+    var CreditNotePopupWidget = PopupWidget.extend({
+        template: 'CreditNotePopupWidget',
+
+        this_events: {
+            'keyup input': 'keyboard_used',
+            'click tbody tr': 'get_ncf_from_seleted_order'
+        },
+
+        loadLastOrders: function(callback) {
+
+            var PosOrder = new Model("pos.order");
+            var PosOrderLine = new Model("pos.order.line");
+
+            PosOrder.query(['id','pos_reference','ncf','date_order']).order_by(['-date_order']).limit(3).all().then(function(orders){
+
+                self.orders = [];
+
+                _.each(orders, function(order) {
+
+                    PosOrderLine.query(['price_unit','qty']).filter([['order_id','=', order.id]]).all().then(function(orderLines){
+
+                        var orderAmount = 0;
+
+                        _.each(orderLines, function(orderLine){
+                            orderAmount += orderLine.price_unit * orderLine.qty;
+                        });
+
+                        order.amount = orderAmount;
+
+                        self.orders.push(order);
+
+                        if(callback)
+                        {
+                            callback(order);
+                        }
+                    });
+
+                });
+
+            });
+
+        },
+
+        init: function(parent, args) {
+            var self = this;
+            this._super(parent, args);
+            this.options = {};
+            //events
+            for(var prop in this.this_events)
+            {
+                this.events[prop] = this.this_events[prop];
+            }
+
+        },
+
+        keyboard_used: function(e) {
+
+            switch(e.keyCode)
+            {
+                case 27: //ESC
+                    this.gui.close_popup();
+                break;
+            }
+        },
+
+        get_ncf_from_seleted_order: function(e) {
+            var $selectedRow = $(e.target.parentElement);
+            var select_ncf = $selectedRow.find('td:nth-child(2)').text();
+            this.$('input').val(select_ncf);
+        },
+
+        show: function(options){
+            var self = this;
             options = options || {};
             this._super(options);
 
             this.renderElement();
             this.$('input,textarea').focus();
+            var $tbody = this.$('tbody');
+
+            this.loadLastOrders(function(order){
+                var row = $('<tr>')
+                .append($('<td>').text(order.pos_reference))
+                .append($('<td>').text(order.ncf))
+                .append($('<td>').text(order.date_order))
+                .append($('<td>').text(self.format_currency(order.amount)));
+                $tbody.append(row);
+            });
+
         },
         click_confirm: function(){
             var value = this.$('input,textarea').val();
