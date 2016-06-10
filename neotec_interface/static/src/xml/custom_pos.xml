@@ -68,7 +68,7 @@
             <div class="popup popup-textinput">
                 <p class="title"><t t-esc=" widget.options.title || '' " /></p>
                 <input type='text' t-att-value="widget.options.value || ''" placeholder="NCF de la Factura"></input>
-                <div class="body touch-scrollable scrollable-y">
+                <div class="body touch-scrollable scrollable-y scrollable-container">
                     <table class="table-x">
                         <thead>
                             <tr>
@@ -78,7 +78,7 @@
                                 <th>Monto</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="credit-note-body scrollable-y">
                         </tbody>
                     </table>
                 </div>
@@ -98,8 +98,20 @@
         <div class="modal-dialog">
             <div class="popup popup-textinput">
                 <p class="title"><t t-esc=" widget.options.title || '' " /></p>
-                <input type='text' t-att-value="widget.options.value || ''" placeholder="Monto de Nota de Crédito"></input>
-                <div class="body touch-scrollable scrollable-y">
+                <input type='text' t-att-value="widget.options.value || ''" placeholder="Monto de Nota de Crédito" disabled="true"></input>
+                <div class="status-bar">
+                    <label>Seleccionados: </label>
+                    <span class="info-shower">0/0</span>
+                    <label>Devolución: </label>
+                    <span class="info-shower">0.00 RD$</span> /
+                    <span class="info-shower">0.00 RD$</span>
+                    <br/>
+                    <label>
+                        <label for="checkAllItems">Todos</label>
+                        <input id="checkAllItems" type="checkbox" class="input-check"/>
+                    </label>
+                </div>
+                <div class="body touch-scrollable scrollable-y scrollable-container">
                     <table class="table-x">
                         <thead>
                             <tr>
@@ -109,7 +121,7 @@
                                 <th>Total</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="credit-note-validate-body scrollable-y">
                         </tbody>
                     </table>
                 </div>

@@ -84,7 +84,6 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                         });
                     });
 
-
                     var countriesSelect = clientEditContainer.find('select.client-address-country');
                     countriesSelect.val(62); //Seleccionar RD por defecto.
 
@@ -311,8 +310,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         template: 'CreditNoteValidatePopupWidget',
 
         this_events: {
-            'keyup input': 'keyboard_used',
-            'click tbody tr': 'give_back_selected_item'
+            'click .credit-note-validate-body tr': 'give_back_selected_item'
         },
 
         init: function(parent, args) {
@@ -349,19 +347,10 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
         },
 
-        keyboard_used: function(e) {
-
-            switch(e.keyCode)
-            {
-                case 27: //ESC
-                    this.gui.close_popup();
-                break;
-            }
-        },
-
-
-        give_back_selected_item: function() {
+        give_back_selected_item: function(e) {
             console.log("todo: implement give_back_selected_item method");
+            var $selectedRow = $(e.target.parentElement);
+            $selectedRow.toggleClass('selected-item');
         },
 
         show: function(options){
@@ -370,6 +359,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             this._super(options);
 
             this.renderElement();
+            this.$('input').focus();
             var $tbody = this.$('tbody');
 
             this.loadOrder(options.ncf, function(order){
@@ -405,8 +395,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         template: 'CreditNotePopupWidget',
 
         this_events: {
-            'keyup input': 'keyboard_used',
-            'click tbody tr': 'get_ncf_from_seleted_order'
+            'click .credit-note-body tr': 'get_ncf_from_seleted_order'
         },
 
         loadLastOrders: function(callback) {
@@ -454,16 +443,6 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 this.events[prop] = this.this_events[prop];
             }
 
-        },
-
-        keyboard_used: function(e) {
-
-            switch(e.keyCode)
-            {
-                case 27: //ESC
-                    this.gui.close_popup();
-                break;
-            }
         },
 
         get_ncf_from_seleted_order: function(e) {

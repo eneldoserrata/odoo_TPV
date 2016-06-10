@@ -1,4 +1,3 @@
-
 .table-x {
     width: 100%;
 }
@@ -30,4 +29,44 @@
 .table-x > tbody tr:hover {
     background: #CECECE;
     cursor: pointer;
+}
+
+.table-x tbody {
+    width: 100%;
+}
+
+.scrollable-container {
+    position: relative;
+    height: 150px;
+    margin: 5px 16px !important;
+}
+
+.selected-item {
+    color: #000;
+    background: rgb(110, 200, 119) !important;
+}
+
+.status-bar {
+    margin: 0 16px;
+    margin-top: 5px;
+}
+
+.info-shower {
+    font-size: 16px;
+    background: #000;
+    border-radius: 8px / 8px;
+    padding: 3px;
+    color: #fff;
+    margin-top: 8px;
+}
+
+.input-check {
+    min-height: 0 !important;
+    height: 20px;
+    width: 20px !important;
+}
+
+#checkAllItems {
+    position: relative;
+    top: 3px;
 }
