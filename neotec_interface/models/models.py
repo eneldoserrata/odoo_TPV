@@ -66,7 +66,7 @@ class FiscalPrinter(models.Model):
                     tax_amount = 1000
                 item['tax'] = str(tax_amount).replace('.', '') + '0'
                 item['price'] = str(item['price'])
-                item['quantity'] = item['quantity'].replace('.', '')
+                item['quantity'] = ("%0.3f" % float(item['quantity'])).replace('.', '')
                 item['type'] = str(item['type'])
 
             for payment in invoice['payments']:
@@ -127,18 +127,24 @@ class FiscalPrinter(models.Model):
             ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + str(
                 ncf_type.ttr).zfill(2) + sequence
 
-            pprint(invoice['orderReference'])
-            current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])], limit=1)
-            current_order.ncf = ncf
+            if 'orderReference' in invoice:
+                current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])], limit=1)
+                current_order.ncf = ncf
 
             invoice['ncfString'] = ncf
+
+            if invoice['referenceNcf'] != '':
+
+                for item in invoice['items']:
+                    order_line = self.env['pos.order.line'].browse(item['orderLineId'])
+                    order_line.unlink()
 
             file_name = str(ncf)
 
             if not os.path.exists(invoice['directory']):
                 os.mkdir(invoice['directory'])
 
-            f = open(invoice['directory'] + '/' + file_name, 'w')
+            f = open(invoice['directory'] + '/' + file_name + '.txt', 'w')
             formatted_invoice = neoutil.format_invoice(invoice)
             f.write(formatted_invoice)
             f.close()
@@ -152,10 +158,10 @@ class FiscalPrinter(models.Model):
             last_dir = path_parts[len(path_parts) - 1]
             remote_path_conf = {'path': last_dir, 'file_name': ncf}
 
-            # try:
-            # neoutil.send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf)
-            # except SSHException:
-            #     raise ValidationError("No se pudo conectar con la terminar de impresión")
+            try:
+                neoutil.send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf)
+            except SSHException:
+                raise ValidationError("No se pudo conectar con la terminar de impresión")
 
 
 class NCFRange(models.Model):
@@ -234,5 +240,33 @@ class CustomPosOrder(models.Model):
     _name = 'pos.order'
     _inherit = 'pos.order'
 
-    legal_tip = fields.Monetary(string="Propina legal (10%)"),
     ncf = fields.Char(string="NCF")
+    legal_tip = fields.Float(string="Propina legal (10%)", compute='_calculate_legal_tip')
+
+    @api.one
+    def _calculate_legal_tip(self):
+        order_lines = self.env['pos.order.line'].search([('order_id', '=', self.ids[0])])
+
+        total = 0
+        for order_line in order_lines:
+            total += order_line.price_subtotal
+
+        legal_tip = total * 0.10;
+        self.legal_tip = neoutil.round_to_2(legal_tip);
+
+
+class CustomPosOrderLine(models.Model):
+    _name = 'pos.order.line'
+    _inherit = 'pos.order.line'
+
+    price_with_tax = fields.Float(string="Precio con Impuestos", compute="_calculate_price_with_tax")
+
+    @api.one
+    def _calculate_price_with_tax(self):
+
+        tax_amount = 0
+        if(self.tax_ids):
+            tax_amount = self.tax_ids.amount
+
+        t = self.price_unit * (tax_amount / 100)
+        self.price_with_tax = neoutil.round_to_2(self.price_unit + t)

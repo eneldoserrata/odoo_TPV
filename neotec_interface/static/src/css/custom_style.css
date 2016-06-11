@@ -37,10 +37,13 @@
 
 .scrollable-container {
     position: relative;
-    height: 150px;
+    height: 195px;
     margin: 5px 16px !important;
 }
 
+.scrollable-container-sm {
+    height: 125px;
+}
 .selected-item {
     color: #000;
     background: rgb(110, 200, 119) !important;
@@ -69,4 +72,9 @@
 #checkAllItems {
     position: relative;
     top: 3px;
+}
+
+
+.money-formatted {
+    text-align: right !important;
 }

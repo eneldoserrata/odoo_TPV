@@ -22,13 +22,14 @@ neotec_interface_models = (function(){
         this.ncfTypeId = '';// Ncf type
     };
 
-    var Item = function(type, description, price, quantity, taxId) {
+    var Item = function(type, description, price, quantity, taxId, orderLineId) {
         this.type = type || '';
         this.quantity = quantity || '';
         this.description = description || '';
         this.price = price || '';
         this.tax = '';
         this.taxId = taxId || '';
+        this.orderLineId = orderLineId || '';
     };
 
     var Invoice = function(type, client) { // TODO In case of Credit Note the 'type' will be sent from the frontend

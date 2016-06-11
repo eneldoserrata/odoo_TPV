@@ -98,20 +98,23 @@
         <div class="modal-dialog">
             <div class="popup popup-textinput">
                 <p class="title"><t t-esc=" widget.options.title || '' " /></p>
-                <input type='text' t-att-value="widget.options.value || ''" placeholder="Monto de Nota de Crédito" disabled="true"></input>
+                <input type='text' class="money-formatted" t-att-value="widget.options.value || ''" placeholder="Monto de Nota de Crédito" disabled="true"></input>
                 <div class="status-bar">
                     <label>Seleccionados: </label>
                     <span class="info-shower">0/0</span>
+                    <br/>
                     <label>Devolución: </label>
                     <span class="info-shower">0.00 RD$</span> /
                     <span class="info-shower">0.00 RD$</span>
                     <br/>
+                    <label>Propina: </label>
+                    <span class="info-shower">0.00 RD$</span>
                     <label>
                         <label for="checkAllItems">Todos</label>
                         <input id="checkAllItems" type="checkbox" class="input-check"/>
                     </label>
                 </div>
-                <div class="body touch-scrollable scrollable-y scrollable-container">
+                <div class="body touch-scrollable scrollable-y scrollable-container scrollable-container-sm">
                     <table class="table-x">
                         <thead>
                             <tr>

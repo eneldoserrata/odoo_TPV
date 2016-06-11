@@ -296,7 +296,37 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     window.posmodel.gui.show_popup('creditnotevalidate',{
                         'title': 'Realizar nota de credito',
                         'ncf': value,
-                        'confirm': function(val){
+                        'confirm': function(creditNote){
+
+                            var FiscalPrinter = new Model("neotec_interface.fiscal_printer");
+                            var NcfType = new Model("neotec_interface.ncf_type");
+                            var fiscalPrinterId = window.posmodel.config.fiscal_printer_id[0];
+
+                            FiscalPrinter.query(['invoice_directory','copy_quantity','bd','ep','ia','charge_legal_tip']).filter([['id','=',fiscalPrinterId]]).first().then(function(fiscalPrinter){
+
+                                var ncf = new neotec_interface_models.NCF();
+
+                                creditNote.fiscalPrinterId = fiscalPrinterId;
+                                creditNote.copyQty = fiscalPrinter.copy_quantity;
+                                creditNote.directory = fiscalPrinter.invoice_directory;
+                                creditNote.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
+                                ncf.office = fiscalPrinter.ep;
+                                ncf.box = fiscalPrinter.ia;
+                                ncf.bd = fiscalPrinter.bd;
+
+                                NcfType.query(['id']).filter([['ttr','=','4']]).first().then(function(ncfType){
+
+                                    ncf.ncfTypeId = ncfType.id;
+                                    creditNote.ncf = ncf;
+
+                                    FiscalPrinter.call("register_invoice", [creditNote]).then(function (res) {
+                                        //do nothing
+                                    });
+
+                                });
+
+                            });
+
 
                          }
                     });
@@ -310,7 +340,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         template: 'CreditNoteValidatePopupWidget',
 
         this_events: {
-            'click .credit-note-validate-body tr': 'give_back_selected_item'
+            'click .credit-note-validate-body tr': 'give_back_selected_item',
+            'change #checkAllItems': 'select_items'
         },
 
         init: function(parent, args) {
@@ -323,34 +354,76 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         },
 
         loadOrder: function(ncf, callback) {
-
+            var self = this;
             var PosOrder = new Model("pos.order");
             var PosOrderLine = new Model("pos.order.line");
 
-            PosOrder.query(['id','pos_reference']).filter([['ncf', '=', ncf]]).first().then(function(order){
+            PosOrder.query(['id','pos_reference','legal_tip']).filter([['ncf', '=', ncf]]).first().then(function(order){
 
-                PosOrderLine.query(['product_id','price_unit','qty']).filter([['order_id','=', order.id]]).all().then(function(orderLines){
+                PosOrderLine.query(['id','product_id','price_unit','qty','price_subtotal_incl', 'price_with_tax', 'tax_ids']).filter([['order_id','=', order.id]]).all().then(function(orderLines){
+
+                    var total = 0;
 
                     _.each(orderLines, function(orderLine){
                         orderLine.product = orderLine.product_id[1];
+                        total += orderLine.price_unit * orderLine.qty;
                     });
 
                     order.orderLines = orderLines;
+
+                    if(isChargingLegalTip)
+                    {
+                        self.legalTip  = total * 0.10;
+                    }
 
                     if(callback)
                     {
                         callback(order);
                     }
+
                 });
 
             });
 
         },
 
+        select_items: function(e){
+
+            if(e.target.checked)
+            {
+                this.$('tbody tr').addClass('selected-item');
+            }
+            else
+            {
+                this.$('tbody tr').removeClass('selected-item');
+            }
+
+            this.updateInfoShowers();
+        },
+
         give_back_selected_item: function(e) {
-            console.log("todo: implement give_back_selected_item method");
             var $selectedRow = $(e.target.parentElement);
             $selectedRow.toggleClass('selected-item');
+
+            this.updateInfoShowers();
+        },
+
+        updateInfoShowers: function() {
+
+            var selectedItems = this.$('tbody tr.selected-item');
+            var infoShowers = this.$('.info-shower');
+            var totalSelectedItems = 0;
+
+            _.each(selectedItems, function(e) {
+                totalSelectedItems += Number.parseFloat($(e).children().eq(3).text());
+            });
+
+            infoShowers[0].textContent = selectedItems.length + '/' + this.totalItemsCount;
+            infoShowers[1].textContent = this.format_currency(totalSelectedItems);
+            infoShowers[2].textContent = this.format_currency(this.totalOrder);
+
+            var total = totalSelectedItems + ((isChargingLegalTip) ? this.legalTip : 0);
+            this.$('input').val(neotec_interface_models.roundTo2(total));
         },
 
         show: function(options){
@@ -364,27 +437,74 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
             this.loadOrder(options.ncf, function(order){
 
+                var totalOrder = 0;
+
                 _.each(order.orderLines, function(orderLine){
 
                     var row = $('<tr>')
                     .append($('<td>').text(orderLine.product))
                     .append($('<td>').text(orderLine.qty))
-                    .append($('<td>').text(self.format_currency(orderLine.price_unit)))
-                    .append($('<td>').text(self.format_currency(orderLine.price_unit * orderLine.qty)));
+                    .append($('<td>').text(self.format_currency(orderLine.price_with_tax)).attr("price", orderLine.price_unit).attr('tax-id', orderLine.tax_ids[0]))
+                    .append($('<td>').text(self.format_currency(orderLine.price_subtotal_incl))).attr('orderline-id', orderLine.id);
 
                     $tbody.append(row);
 
+                    totalOrder += orderLine.price_subtotal_incl;
                 });
 
+                self.totalItemsCount = order.orderLines.length;
+                self.totalOrder = totalOrder;
+
+                self.$('#checkAllItems').prop('checked', true);
+                self.$('tbody tr').addClass('selected-item');
+                self.updateInfoShowers();
+
+                if(isChargingLegalTip)
+                {
+                    self.$('.info-shower')[3].textContent =  self.format_currency(self.legalTip);
+                }
             });
 
         },
 
         click_confirm: function(){
-            var value = this.$('input').val();
+
+            var type = '';
+            var referenceTtr = this.options.ncf.substr(9,2);
+
+            if(referenceTtr == '02')
+                type = '3';
+            else if(referenceTtr == '15')
+                type = '4';
+            else if(referenceTtr == '14')
+                type = '8';
+            else if(referenceTtr == '01')
+                type = '4';
+
+            var creditNote = new neotec_interface_models.Invoice(type);
+            creditNote.referenceNcf = this.options.ncf;
+
+            var $selectedItems = this.$('tbody tr.selected-item');
+
+            _.each($selectedItems, function($selectedItem){
+
+                $selectedItem = $($selectedItem);
+
+                var description = $selectedItem.children().eq(0).text();
+                var qty = $selectedItem.children().eq(1).text();
+                var price = $selectedItem.children().eq(2).attr('price').split(' ')[0];
+                var taxId = Number.parseInt($selectedItem.children().eq(2).attr('tax-id'));
+                var orderLineId = Number.parseInt($selectedItem.attr('orderline-id'));
+
+                var item = new neotec_interface_models.Item(1, description, price, qty, taxId, orderLineId);
+
+                creditNote.items.push(item);
+            });
+
+
             this.gui.close_popup();
             if( this.options.confirm ){
-                this.options.confirm.call(this,value);
+                this.options.confirm.call(this,creditNote);
             }
         }
     });

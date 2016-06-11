@@ -101,3 +101,7 @@ def format_invoice(invoice):
         formatted_invoice += item['type'] + '||' + item['quantity'] + '||' + item['description'] + '||' + item['price'] + '||' + item['tax'] + '\n'
 
     return formatted_invoice
+
+
+def round_to_2(amount):
+    return round(amount * 100) / 100
