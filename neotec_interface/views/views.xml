@@ -116,6 +116,22 @@
       </field>
     </record>
 
+    <record id="custom_pos_order_form" model="ir.ui.view">
+      <field name="name">pos.order</field>
+      <field name="model">pos.order</field>
+      <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+      <field name="view_type">form</field>
+      <field name="arch" type="xml">
+        <field name="fiscal_position_id" position="after">
+            <field name="using_legal_tip"/>
+        </field>
+        <field name="amount_tax" position="after">
+            <field name="legal_tip" attrs="{'invisible':[('using_legal_tip', '==', False)]}"/>
+        </field>
+
+      </field>
+    </record>
+
     <record id="custom_partner_form" model="ir.ui.view">
       <field name="name">res.partner</field>
       <field name="model">res.partner</field>
@@ -136,20 +152,6 @@
 
       </field>
     </record>
-
-    <!--<record id="custom_pos_order_form" model="ir.ui.view">-->
-      <!--<field name="name">pos.order</field>-->
-      <!--<field name="model">pos.order</field>-->
-      <!--<field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>-->
-      <!--<field name="view_type">form</field>-->
-      <!--<field name="arch" type="xml">-->
-
-        <!--<field name="tax_ids" position="after">-->
-            <!--<field name="legal_tip"/>-->
-        <!--</field>-->
-
-      <!--</field>-->
-    <!--</record>-->
 
     <record model="ir.actions.act_window" id="neotec_interface.fiscal_printer_action">
       <field name="name">Impresoras Fiscales</field>

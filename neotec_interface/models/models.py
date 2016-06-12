@@ -10,6 +10,7 @@ from openerp.exceptions import ValidationError
 from ..neoutil import neoutil
 
 from openerp import models, fields, api
+from openerp.osv import osv, fields as oldField
 from pprint import pprint
 
 
@@ -129,7 +130,9 @@ class FiscalPrinter(models.Model):
 
             if 'orderReference' in invoice:
                 current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])], limit=1)
+                fiscal_printer = self.env['neotec_interface.fiscal_printer'].browse(invoice['fiscalPrinterId'])
                 current_order.ncf = ncf
+                current_order.using_legal_tip = fiscal_printer.charge_legal_tip
 
             invoice['ncfString'] = ncf
 
@@ -237,22 +240,56 @@ class PaymentType(models.Model):
 
 
 class CustomPosOrder(models.Model):
-    _name = 'pos.order'
     _inherit = 'pos.order'
 
     ncf = fields.Char(string="NCF")
+    using_legal_tip = fields.Boolean(string='Incluir Propina Legal', readonly=True)
     legal_tip = fields.Float(string="Propina legal (10%)", compute='_calculate_legal_tip')
 
     @api.one
+    @api.model
     def _calculate_legal_tip(self):
         order_lines = self.env['pos.order.line'].search([('order_id', '=', self.ids[0])])
 
         total = 0
-        for order_line in order_lines:
-            total += order_line.price_subtotal
+
+        if self.using_legal_tip:
+            for order_line in order_lines:
+                total += order_line.price_subtotal
 
         legal_tip = total * 0.10;
-        self.legal_tip = neoutil.round_to_2(legal_tip);
+        self.amount_total += legal_tip
+        self.legal_tip = neoutil.round_to_2(legal_tip)
+
+
+class CustomLegacyPosOrder(osv.osv):
+    """
+        Made for overriding the odoo 8 pos.order _amount_all method, so that legal tip is included in total
+    """
+    _name = 'pos.order'
+    _inherit = 'pos.order'
+
+    def _amount_all(self, cr, uid, ids, name, args, context=None):
+        res = super(CustomLegacyPosOrder, self)._amount_all(cr, uid, ids, name, args, context)
+        for order in self.browse(cr, uid, ids, context=context):
+            amount_untaxed = 0
+            for line in order.lines:
+                amount_untaxed += line.price_subtotal
+
+            cr.execute('SELECT using_legal_tip FROM pos_order WHERE id = ' + str(order.id))
+            using_legal_tip = cr.fetchone()[0]
+
+            if using_legal_tip:
+                res[order.id]['amount_total'] += amount_untaxed * 0.10
+
+        return res
+
+    _columns = {
+        'amount_tax': oldField.function(_amount_all, string='Taxes', digits=0, multi='all'),
+        'amount_total': oldField.function(_amount_all, string='Total', digits=0, multi='all'),
+        'amount_paid': oldField.function(_amount_all, string='Paid', states={'draft': [('readonly', False)]}, readonly=True, digits=0, multi='all'),
+        'amount_return': oldField.function(_amount_all, string='Returned', digits=0, multi='all'),
+    }
 
 
 class CustomPosOrderLine(models.Model):
