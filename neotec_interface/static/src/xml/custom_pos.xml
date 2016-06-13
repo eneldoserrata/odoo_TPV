@@ -60,6 +60,9 @@
             <div class="oe_status" id="credit_note_option">
                 <i class="fa fa-book oe_icon oe_orange" aria-hidden="true"></i>
             </div>
+            <div class="oe_status" id="delivery_option">
+                <i class="fa fa-motorcycle oe_icon oe_orange" aria-hidden="true"></i>
+            </div>
         </t>
     </t>
 

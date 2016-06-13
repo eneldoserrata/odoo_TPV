@@ -123,11 +123,21 @@
       <field name="view_type">form</field>
       <field name="arch" type="xml">
         <field name="fiscal_position_id" position="after">
+            <field name="ncf"/>
             <field name="using_legal_tip"/>
+            <field name="is_delivery_order"/>
         </field>
         <field name="amount_tax" position="after">
             <field name="legal_tip" attrs="{'invisible':[('using_legal_tip', '==', False)]}"/>
         </field>
+
+        <xpath expr="//sheet//page[@name='extra']" position="after">
+            <page name="delivery" string="Domicilio">
+                  <group string="Información">
+                      <field name="delivery_address"/>
+                  </group>
+            </page>
+        </xpath>
 
       </field>
     </record>

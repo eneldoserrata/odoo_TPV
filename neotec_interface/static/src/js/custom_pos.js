@@ -22,6 +22,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             });
 
             $('#credit_note_option').click(doCreditNote);
+            $('#delivery_option').click(doDelivery);
         }
 
     });
@@ -212,6 +213,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             invoice.comments = pos.config.receipt_footer;
             invoice.orderReference = currentOrder.name; // gets the pos reference for the order
             invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
+            invoice.deliveryAddress = currentOrder.delivery_address || null;
             ncf.office = fiscalPrinter.ep;
             ncf.box = fiscalPrinter.ia;
             ncf.bd = fiscalPrinter.bd;
@@ -221,6 +223,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
                 if(item.product.display_name == "Recargo")
                 {
+                    itemType = 4;
                     itemType = 4;
                 }
                 else if(item.product.display_name == "Propina")
@@ -333,6 +336,30 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 }
 
              }
+        });
+    };
+
+    var doDelivery = function(){
+
+        var client = posmodel.get_client();
+        var clientAddress = null;
+
+        if(client)
+        {
+           clientAddress = client.street;
+        }
+
+        if (posmodel.get_order().delivery_address != undefined)
+        {
+            clientAddress = posmodel.get_order().delivery_address;
+        }
+
+        window.posmodel.gui.show_popup('textarea',{
+            'title': 'Dirección de Entrega',
+            'value': clientAddress || '',
+            'confirm': function(value){
+                posmodel.get_order().delivery_address = value;
+            }
         });
     };
 

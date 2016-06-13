@@ -128,13 +128,17 @@ class FiscalPrinter(models.Model):
             ncf = ncf_type.serie + invoice['ncf']['bd'] + invoice['ncf']['office'] + invoice['ncf']['box'] + str(
                 ncf_type.ttr).zfill(2) + sequence
 
+            invoice['ncfString'] = ncf
+
             if 'orderReference' in invoice:
                 current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])], limit=1)
                 fiscal_printer = self.env['neotec_interface.fiscal_printer'].browse(invoice['fiscalPrinterId'])
                 current_order.ncf = ncf
                 current_order.using_legal_tip = fiscal_printer.charge_legal_tip
 
-            invoice['ncfString'] = ncf
+                if invoice['deliveryAddress']:
+                    current_order.delivery_address = invoice['deliveryAddress']
+                    current_order.is_delivery_order = invoice['deliveryAddress']
 
             if invoice['referenceNcf'] != '':
 
@@ -242,7 +246,9 @@ class PaymentType(models.Model):
 class CustomPosOrder(models.Model):
     _inherit = 'pos.order'
 
-    ncf = fields.Char(string="NCF")
+    ncf = fields.Char(string="NCF", readonly=True)
+    is_delivery_order = fields.Boolean(string="Orden Domicilio")
+    delivery_address = fields.Char(string=u"Dirección")
     using_legal_tip = fields.Boolean(string='Incluir Propina Legal', readonly=True)
     legal_tip = fields.Float(string="Propina legal (10%)", compute='_calculate_legal_tip')
 
@@ -283,6 +289,24 @@ class CustomLegacyPosOrder(osv.osv):
                 res[order.id]['amount_total'] += amount_untaxed * 0.10
 
         return res
+
+    def test_paid(self, cr, uid, ids, context=None):
+        """A Point of Sale is paid when the sum
+        @return: True
+        """
+        for order in self.browse(cr, uid, ids, context=context):
+            if order.lines and not order.amount_total:
+                return True
+
+            amount_untaxed = 0
+            for line in order.lines:
+                amount_untaxed += line.price_subtotal
+
+            legal_tip = amount_untaxed * 0.10
+            if (not order.lines) or (not order.statement_ids) or \
+                    (neoutil.round_to_2(abs(order.amount_total - (order.amount_paid - legal_tip))) > 0.00001):
+                return False
+        return True
 
     _columns = {
         'amount_tax': oldField.function(_amount_all, string='Taxes', digits=0, multi='all'),
