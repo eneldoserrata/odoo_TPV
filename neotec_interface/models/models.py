@@ -2,6 +2,7 @@
 import json
 import os
 import urllib2
+
 try:
     from paramiko import SSHException
 except ImportError:
@@ -9,8 +10,10 @@ except ImportError:
 from openerp.exceptions import ValidationError
 from ..neoutil import neoutil
 
-from openerp import models, fields, api
-from openerp.osv import osv, fields as oldField
+from openerp import models, fields, api, SUPERUSER_ID
+from openerp.osv import osv, fields as oldFields
+from openerp.exceptions import UserError
+from openerp.tools.translate import _
 from pprint import pprint
 
 
@@ -63,11 +66,12 @@ class FiscalPrinter(models.Model):
                 tax_amount = 18.0
                 if tax:
                     tax_amount = tax.amount
-                if tax_amount == 0: # no tax applicable for this item
+                if tax_amount == 0:  # no tax applicable for this item
                     tax_amount = 1000
                 item['tax'] = str(tax_amount).replace('.', '') + '0'
                 item['price'] = str(item['price'])
-                item['quantity'] = ("%0.3f" % float(item['quantity'])).replace('.', '')
+                item['quantity'] = ("%0.3f" % float(item['quantity'].replace('.', '').replace(',', '')))
+                item['quantity'] = item['quantity'][:item['quantity'].index('.')]
                 item['type'] = str(item['type'])
 
             for payment in invoice['payments']:
@@ -131,14 +135,18 @@ class FiscalPrinter(models.Model):
             invoice['ncfString'] = ncf
 
             if 'orderReference' in invoice:
-                current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])], limit=1)
+                current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])],
+                                                             limit=1)
                 fiscal_printer = self.env['neotec_interface.fiscal_printer'].browse(invoice['fiscalPrinterId'])
                 current_order.ncf = ncf
                 current_order.using_legal_tip = fiscal_printer.charge_legal_tip
 
                 if invoice['deliveryAddress']:
+                    current_order.is_delivery_order = True
                     current_order.delivery_address = invoice['deliveryAddress']
-                    current_order.is_delivery_order = invoice['deliveryAddress']
+
+                    for c in neoutil.split2len('ENTREGA: ' + invoice['deliveryAddress'], 40):
+                        invoice['comments'] += c
 
             if invoice['referenceNcf'] != '':
 
@@ -255,17 +263,36 @@ class CustomPosOrder(models.Model):
     @api.one
     @api.model
     def _calculate_legal_tip(self):
-        order_lines = self.env['pos.order.line'].search([('order_id', '=', self.ids[0])])
 
         total = 0
 
         if self.using_legal_tip:
+            order_lines = self.env['pos.order.line'].search([('order_id', '=', self.ids[0])])
             for order_line in order_lines:
                 total += order_line.price_subtotal
 
         legal_tip = total * 0.10;
         self.amount_total += legal_tip
         self.legal_tip = neoutil.round_to_2(legal_tip)
+
+    @api.v8
+    def test_paid(self):
+        """A Point of Sale is paid when the sum
+        @return: True
+        """
+        if self.lines and not self.amount_total:
+            return True
+        amount_untaxed = 0
+        for line in self.lines:
+            amount_untaxed += line.price_subtotal
+
+        legal_tip = self.amount_paid - self.amount_total
+
+        if (not self.lines) or (not self.statement_ids) or \
+                (abs(self.amount_total - (self.amount_paid - legal_tip)) > 0.00001):
+            return False
+
+        return True
 
 
 class CustomLegacyPosOrder(osv.osv):
@@ -277,8 +304,12 @@ class CustomLegacyPosOrder(osv.osv):
 
     def _amount_all(self, cr, uid, ids, name, args, context=None):
         res = super(CustomLegacyPosOrder, self)._amount_all(cr, uid, ids, name, args, context)
+        cur_obj = self.pool.get('res.currency')
+
         for order in self.browse(cr, uid, ids, context=context):
             amount_untaxed = 0
+            cur = order.pricelist_id.currency_id
+
             for line in order.lines:
                 amount_untaxed += line.price_subtotal
 
@@ -286,33 +317,201 @@ class CustomLegacyPosOrder(osv.osv):
             using_legal_tip = cr.fetchone()[0]
 
             if using_legal_tip:
-                res[order.id]['amount_total'] += amount_untaxed * 0.10
+                res[order.id]['amount_total'] += cur_obj.round(cr, uid, cur, amount_untaxed * 0.10)
 
         return res
 
-    def test_paid(self, cr, uid, ids, context=None):
-        """A Point of Sale is paid when the sum
-        @return: True
-        """
+    def _create_account_move_line(self, cr, uid, ids, session=None, move_id=None, context=None):
+        # Tricky, via the workflow, we only have one id in the ids variable
+        """Create a account move line of order grouped by products or not."""
+        account_move_obj = self.pool.get('account.move')
+        account_tax_obj = self.pool.get('account.tax')
+        property_obj = self.pool.get('ir.property')
+        cur_obj = self.pool.get('res.currency')
+
+        # session_ids = set(order.session_id for order in self.browse(cr, uid, ids, context=context))
+
+        if session and not all(
+                        session.id == order.session_id.id for order in self.browse(cr, uid, ids, context=context)):
+            raise UserError(_('Selected orders do not have the same session!'))
+
+        grouped_data = {}
+        have_to_group_by = session and session.config_id.group_by or False
+
         for order in self.browse(cr, uid, ids, context=context):
-            if order.lines and not order.amount_total:
-                return True
+            if order.account_move:
+                continue
+            if order.state != 'paid':
+                continue
 
-            amount_untaxed = 0
+            current_company = order.sale_journal.company_id
+
+            group_tax = {}
+            account_def = property_obj.get(cr, uid, 'property_account_receivable_id', 'res.partner', context=context)
+
+            order_account = order.partner_id and \
+                            order.partner_id.property_account_receivable_id and \
+                            order.partner_id.property_account_receivable_id.id or \
+                            account_def and account_def.id
+
+            if move_id is None:
+                # Create an entry for the sale
+                move_id = self._create_account_move(cr, uid, order.session_id.start_at, order.name,
+                                                    order.sale_journal.id, order.company_id.id, context=context)
+
+            move = account_move_obj.browse(cr, SUPERUSER_ID, move_id, context=context)
+
+            def insert_data(data_type, values):
+                # if have_to_group_by:
+
+                sale_journal_id = order.sale_journal.id
+
+                # 'quantity': line.qty,
+                # 'product_id': line.product_id.id,
+                values.update({
+                    'ref': order.name,
+                    'partner_id': order.partner_id and self.pool.get("res.partner")._find_accounting_partner(
+                        order.partner_id).id or False,
+                    'journal_id': sale_journal_id,
+                    'date': oldFields.date.context_today(self, cr, uid, context=context),
+                    'move_id': move_id,
+                })
+
+                if data_type == 'product':
+                    key = ('product', values['partner_id'], (values['product_id'], values['name']),
+                           values['analytic_account_id'], values['debit'] > 0)
+                elif data_type == 'tax':
+                    key = ('tax', values['partner_id'], values['tax_line_id'], values['debit'] > 0)
+                elif data_type == 'counter_part':
+                    key = ('counter_part', values['partner_id'], values['account_id'], values['debit'] > 0)
+                elif data_type == 'legal_tip':
+                    key = ('legal_tip', values['partner_id'], values['account_id'], values['debit'] > 0)
+                else:
+                    return
+
+                grouped_data.setdefault(key, [])
+
+                # if not have_to_group_by or (not grouped_data[key]):
+                #     grouped_data[key].append(values)
+                # else:
+                #     pass
+
+                if have_to_group_by:
+                    if not grouped_data[key]:
+                        grouped_data[key].append(values)
+                    else:
+                        for line in grouped_data[key]:
+                            if line.get('tax_code_id') == values.get('tax_code_id'):
+                                current_value = line
+                                current_value['quantity'] = current_value.get('quantity', 0.0) + values.get('quantity',
+                                                                                                            0.0)
+                                current_value['credit'] = current_value.get('credit', 0.0) + values.get('credit', 0.0)
+                                current_value['debit'] = current_value.get('debit', 0.0) + values.get('debit', 0.0)
+                                break
+                        else:
+                            grouped_data[key].append(values)
+                else:
+                    grouped_data[key].append(values)
+
+            # because of the weird way the pos order is written, we need to make sure there is at least one line,
+            # because just after the 'for' loop there are references to 'line' and 'income_account' variables (that
+            # are set inside the for loop)
+            # TOFIX: a deep refactoring of this method (and class!) is needed in order to get rid of this stupid hack
+            assert order.lines, _('The POS order must have lines when calling this method')
+            # Create an move for each order line
+
+            cur = order.pricelist_id.currency_id
             for line in order.lines:
-                amount_untaxed += line.price_subtotal
+                amount = line.price_subtotal
 
-            legal_tip = amount_untaxed * 0.10
-            if (not order.lines) or (not order.statement_ids) or \
-                    (neoutil.round_to_2(abs(order.amount_total - (order.amount_paid - legal_tip))) > 0.00001):
-                return False
+                # Search for the income account
+                if line.product_id.property_account_income_id.id:
+                    income_account = line.product_id.property_account_income_id.id
+                elif line.product_id.categ_id.property_account_income_categ_id.id:
+                    income_account = line.product_id.categ_id.property_account_income_categ_id.id
+                else:
+                    raise UserError(_('Please define income ' \
+                                      'account for this product: "%s" (id:%d).') \
+                                    % (line.product_id.name, line.product_id.id))
+
+                name = line.product_id.name
+                if line.notice:
+                    # add discount reason in move
+                    name = name + ' (' + line.notice + ')'
+
+                # Create a move for the line for the order line
+                insert_data('product', {
+                    'name': name,
+                    'quantity': line.qty,
+                    'product_id': line.product_id.id,
+                    'account_id': income_account,
+                    'analytic_account_id': self._prepare_analytic_account(cr, uid, line, context=context),
+                    'credit': ((amount > 0) and amount) or 0.0,
+                    'debit': ((amount < 0) and -amount) or 0.0,
+                    'partner_id': order.partner_id and self.pool.get("res.partner")._find_accounting_partner(
+                        order.partner_id).id or False
+                })
+
+                # Create the tax lines
+                taxes = []
+                for t in line.tax_ids_after_fiscal_position:
+                    if t.company_id.id == current_company.id:
+                        taxes.append(t.id)
+                if not taxes:
+                    continue
+                for tax in account_tax_obj.browse(cr, uid, taxes, context=context).compute_all(
+                                        line.price_unit * (100.0 - line.discount) / 100.0, cur, line.qty)['taxes']:
+                    insert_data('tax', {
+                        'name': _('Tax') + ' ' + tax['name'],
+                        'product_id': line.product_id.id,
+                        'quantity': line.qty,
+                        'account_id': tax['account_id'] or income_account,
+                        'credit': ((tax['amount'] > 0) and tax['amount'] ) or 0.0,
+                        'debit': ((tax['amount'] < 0) and -tax['amount']) or 0.0,
+                        'tax_line_id': tax['id'],
+                        'partner_id': order.partner_id and self.pool.get("res.partner")._find_accounting_partner(
+                            order.partner_id).id or False
+                    })
+
+            # counterpart
+            insert_data('counter_part', {
+                'name': _("Trade Receivables"),  # order.name,
+                'account_id': order_account,
+                'credit': ((order.amount_total < 0) and -order.amount_total) or 0.0,
+                'debit': ((order.amount_total > 0) and order.amount_total) or 0.0,
+                'partner_id': order.partner_id and self.pool.get("res.partner")._find_accounting_partner(
+                    order.partner_id).id or False
+            })
+
+            # legal_tip if exists, ..... I am pro, I am Diego
+            insert_data('legal_tip', {
+                'name': _("Propina Legal"),  # order.name,
+                'account_id': order_account,
+                'credit': (order.using_legal_tip and order.legal_tip) or 0.0,
+                'debit': 0.0,
+                'partner_id': order.partner_id and self.pool.get("res.partner")._find_accounting_partner(
+                    order.partner_id).id or False
+            })
+
+            order.write({'state': 'done', 'account_move': move_id})
+
+        all_lines = []
+        for group_key, group_data in grouped_data.iteritems():
+            for value in group_data:
+                all_lines.append((0, 0, value), )
+
+        if move_id:  # In case no order was changed
+            self.pool.get("account.move").write(cr, SUPERUSER_ID, [move_id], {'line_ids': all_lines}, context=context)
+            self.pool.get("account.move").post(cr, SUPERUSER_ID, [move_id], context=context)
+
         return True
 
     _columns = {
-        'amount_tax': oldField.function(_amount_all, string='Taxes', digits=0, multi='all'),
-        'amount_total': oldField.function(_amount_all, string='Total', digits=0, multi='all'),
-        'amount_paid': oldField.function(_amount_all, string='Paid', states={'draft': [('readonly', False)]}, readonly=True, digits=0, multi='all'),
-        'amount_return': oldField.function(_amount_all, string='Returned', digits=0, multi='all'),
+        'amount_tax': oldFields.function(_amount_all, string='Taxes', digits=0, multi='all'),
+        'amount_total': oldFields.function(_amount_all, string='Total', digits=0, multi='all'),
+        'amount_paid': oldFields.function(_amount_all, string='Paid', states={'draft': [('readonly', False)]},
+                                       readonly=True, digits=0, multi='all'),
+        'amount_return': oldFields.function(_amount_all, string='Returned', digits=0, multi='all'),
     }
 
 
@@ -324,9 +523,8 @@ class CustomPosOrderLine(models.Model):
 
     @api.one
     def _calculate_price_with_tax(self):
-
         tax_amount = 0
-        if(self.tax_ids):
+        if (self.tax_ids):
             tax_amount = self.tax_ids.amount
 
         t = self.price_unit * (tax_amount / 100)

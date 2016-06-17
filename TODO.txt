@@ -38,3 +38,9 @@ Terminar las notas de credito
 
 Installation
 Add Domicilio Filter
+
+TODO: Override export_as_JSON on Order Client Model
+
+account.bank.statement
+
+Cannot create unbalanced journal entry.

@@ -210,7 +210,10 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             invoice.fiscalPrinterId = fiscalPrinterId;
             invoice.copyQty = fiscalPrinter.copy_quantity;
             invoice.directory = fiscalPrinter.invoice_directory;
-            invoice.comments = pos.config.receipt_footer;
+            if(pos.config.receipt_footer)
+            {
+                invoice.comments = pos.config.receipt_footer.padRight(40, ' ');
+            }
             invoice.orderReference = currentOrder.name; // gets the pos reference for the order
             invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
             invoice.deliveryAddress = currentOrder.delivery_address || null;

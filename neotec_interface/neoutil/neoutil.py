@@ -4,6 +4,7 @@ This module provides helpers in order to manage fiscal invoices
 import os
 import socket
 import traceback
+
 try:
     import paramiko
 except ImportError:
@@ -11,7 +12,6 @@ except ImportError:
 
 
 def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_no_sale=False):
-
     # Paramiko client configuration
     use_gss_api = False  # enable GSS-API / SSPI authentication
     dog_ss_api_key_exchange = False
@@ -39,7 +39,6 @@ def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_n
         host_key = host_keys[host_name][host_key_type]
         print('Using host key of type %s' % host_key_type)
 
-
     try:
         t = paramiko.Transport((host_name, port))
         t.connect(host_key, username, password, gss_host=socket.getfqdn(host_name),
@@ -47,8 +46,8 @@ def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_n
         sftp = paramiko.SFTPClient.from_transport(t)
 
         office_dir = remote_path_conf['path']
-        office_invoice_dir = office_dir+'/factura'
-        office_no_sale_dir = office_dir+'/noventa'
+        office_invoice_dir = office_dir + '/factura'
+        office_no_sale_dir = office_dir + '/noventa'
 
         try:
             sftp.mkdir(office_dir)
@@ -58,11 +57,11 @@ def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_n
             print(remote_path_conf['path'] + ' already exists')
 
         if is_no_sale:
-            with sftp.open(office_no_sale_dir+'/' + remote_path_conf['file_name']+'.txt', 'w') as f:
+            with sftp.open(office_no_sale_dir + '/' + remote_path_conf['file_name'] + '.txt', 'w') as f:
                 f.write(formatted_invoice)
                 print 'No Sale: \"' + remote_path_conf['file_name'] + '\" sent to ftp server'
         else:
-            with sftp.open(office_invoice_dir + '/' + remote_path_conf['file_name']+'.txt', 'w') as f:
+            with sftp.open(office_invoice_dir + '/' + remote_path_conf['file_name'] + '.txt', 'w') as f:
                 f.write(formatted_invoice)
                 print 'Invoice: \"' + remote_path_conf['file_name'] + '\" sent to ftp server'
 
@@ -98,10 +97,25 @@ def format_invoice(invoice):
 
     # items
     for item in invoice['items']:
-        formatted_invoice += item['type'] + '||' + item['quantity'] + '||' + item['description'] + '||' + item['price'] + '||' + item['tax'] + '\n'
+        formatted_invoice += item['type'] + '||' + item['quantity'] + '||' + item['description'] + '||' + item[
+            'price'] + '||' + item['tax'] + '\n'
 
     return formatted_invoice
 
 
 def round_to_2(amount):
     return round(amount * 100) / 100
+
+
+def split2len(s, n):
+    """
+    This function splits a String in chunks of N characters
+    :param s: String to be splited
+    :param n: The frecuency number of characters to be splited
+    :return: Array containing chunks of the N splited string
+    """
+    def _f(s, n):
+        while s:
+            yield s[:n]
+            s = s[n:]
+    return list(_f(s, n))
