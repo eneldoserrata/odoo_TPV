@@ -12,9 +12,10 @@ neotec_interface_models = (function(){
         this.amount = amount || '';
     };
 
-    var Client = function(name, rnc, address) {
+    var Client = function(name, rnc, phone) {
         this.name = name || ''; // Buyer Social Reason
         this.rnc = rnc || ''; // Buyer RNC
+        this.phone = phone || ''; // Buyer Phone Number
     };
 
     var NCF = function() {

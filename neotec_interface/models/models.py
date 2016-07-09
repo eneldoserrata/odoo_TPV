@@ -69,9 +69,8 @@ class FiscalPrinter(models.Model):
                 if tax_amount == 0:  # no tax applicable for this item
                     tax_amount = 1000
                 item['tax'] = str(tax_amount).replace('.', '') + '0'
-                item['price'] = str(item['price'])
-                item['quantity'] = ("%0.3f" % float(item['quantity'].replace('.', '').replace(',', '')))
-                item['quantity'] = item['quantity'][:item['quantity'].index('.')]
+                item['quantity'] = '{:.3f}'.format(item['quantity']).replace('.', '').replace(',','')
+                item['price'] = '{:.2f}'.format(item['price']).replace('.', '').replace(',','')
                 item['type'] = str(item['type'])
 
             for payment in invoice['payments']:
@@ -141,25 +140,31 @@ class FiscalPrinter(models.Model):
                 current_order.ncf = ncf
                 current_order.using_legal_tip = fiscal_printer.charge_legal_tip
 
-                if invoice['deliveryAddress']:
-                    current_order.is_delivery_order = True
-                    current_order.delivery_address = invoice['deliveryAddress']
+                if not invoice['client'] is None:
 
-                    for c in neoutil.split2len('ENTREGA: ' + invoice['deliveryAddress'], 40):
-                        invoice['comments'] += c
+                    if invoice['deliveryAddress']:
+                        current_order.is_delivery_order = True
+                        current_order.delivery_address = invoice['deliveryAddress']
+
+                        for c in neoutil.split2len('ENTREGA: ' + invoice['deliveryAddress'], 40):
+                            invoice['comments'] += c.ljust(40)
+
+                        if invoice['client']['phone'] != '':
+                            for c in neoutil.split2len('TELEFONO: ' + invoice['client']['phone'], 40):
+                                invoice['comments'] += c.ljust(40)
 
             if invoice['referenceNcf'] != '':
 
                 for item in invoice['items']:
                     order_line = self.env['pos.order.line'].browse(item['orderLineId'])
-                    order_line.unlink()
+                    order_line.price_unit = 0
 
             file_name = str(ncf)
 
-            if not os.path.exists(invoice['directory']):
-                os.mkdir(invoice['directory'])
+            if not os.path.exists(invoice['directory']+'/factura'):
+                os.makedirs(invoice['directory']+'/factura')
 
-            f = open(invoice['directory'] + '/' + file_name + '.txt', 'w')
+            f = open(invoice['directory'] + '/factura/' + file_name + '.txt', 'w')
             formatted_invoice = neoutil.format_invoice(invoice)
             f.write(formatted_invoice)
             f.close()
@@ -177,6 +182,53 @@ class FiscalPrinter(models.Model):
                 neoutil.send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf)
             except SSHException:
                 raise ValidationError("No se pudo conectar con la terminar de impresión")
+
+    @api.one
+    def do_z_close(self):
+
+        if not os.path.exists(self.invoice_directory):
+            os.makedirs(self.invoice_directory)
+
+        file_name = 'cierrez'
+
+        f = open(self.invoice_directory + '/' + file_name + '.txt', 'w')
+        f.write('1')
+        f.close()
+
+        ftp_conf = {'ftp_user': self.ftp_user, 'ftp_pwd': self.ftp_pwd,
+                    'ftp_ip': self.ftp_ip}
+
+        path_parts = self.invoice_directory.split('/')
+        last_dir = path_parts[len(path_parts) - 1]
+        remote_path_conf = {'path': last_dir, 'file_name': file_name}
+
+        try:
+            neoutil.send_invoice_to_terminal('1', ftp_conf, remote_path_conf, is_operation=True)
+        except SSHException:
+            raise ValidationError("No se pudo conectar con la terminar de impresión")
+
+    @api.one
+    def do_x_close(self):
+        if not os.path.exists(self.invoice_directory):
+            os.makedirs(self.invoice_directory)
+
+        file_name = 'cierrex'
+
+        f = open(self.invoice_directory + '/' + file_name + '.txt', 'w')
+        f.write('2')
+        f.close()
+
+        ftp_conf = {'ftp_user': self.ftp_user, 'ftp_pwd': self.ftp_pwd,
+                    'ftp_ip': self.ftp_ip}
+
+        path_parts = self.invoice_directory.split('/')
+        last_dir = path_parts[len(path_parts) - 1]
+        remote_path_conf = {'path': last_dir, 'file_name': file_name}
+
+        try:
+            neoutil.send_invoice_to_terminal('2', ftp_conf, remote_path_conf, is_operation=True)
+        except SSHException:
+            raise ValidationError("No se pudo conectar con la terminar de impresión")
 
 
 class NCFRange(models.Model):

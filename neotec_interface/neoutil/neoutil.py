@@ -11,7 +11,7 @@ except ImportError:
     pass
 
 
-def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_no_sale=False):
+def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_no_sale=False, is_operation=False):
     # Paramiko client configuration
     use_gss_api = False  # enable GSS-API / SSPI authentication
     dog_ss_api_key_exchange = False
@@ -58,6 +58,10 @@ def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_n
 
         if is_no_sale:
             with sftp.open(office_no_sale_dir + '/' + remote_path_conf['file_name'] + '.txt', 'w') as f:
+                f.write(formatted_invoice)
+                print 'No Sale: \"' + remote_path_conf['file_name'] + '\" sent to ftp server'
+        elif is_operation:
+            with sftp.open(office_dir + '/' + remote_path_conf['file_name'] + '.txt', 'w') as f:
                 f.write(formatted_invoice)
                 print 'No Sale: \"' + remote_path_conf['file_name'] + '\" sent to ftp server'
         else:

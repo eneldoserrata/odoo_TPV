@@ -6,6 +6,10 @@
       <field name="model">neotec_interface.fiscal_printer</field>
       <field name="arch" type="xml">
         <form string="Impresora Fiscal">
+            <header>
+                <button string="Cierre Z" type="object" name="do_z_close" class="oe_highlight"/>
+                <button string="Cierre X" type="object" name="do_x_close"/>
+            </header>
             <sheet>
                  <notebook>
                     <page string="Impresora">

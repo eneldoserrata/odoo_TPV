@@ -52,7 +52,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                         NcfType.query().all().then(function (result) {
 
                             _.each(result, function(ncf){
-                                if(!(ncf.id == 1 || ncf.id == 5)) // Omitir Consumidor Final, Nota Credito
+                                if(ncf.id != 5) //Omitir Nota Credito
                                 {
                                     var ncfTypeOption = $("<option>");
                                     ncfTypeOption.val(ncf.id);
@@ -73,7 +73,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 {
                     NcfType.query().all().then(function (result) {
                         _.each(result, function(ncf){
-                            if(!(ncf.id == 1 || ncf.id == 5)) // Omitir Consumidor Final, Nota Credito
+                            if(ncf.id != 5) // Omitir Nota Credito
                             {
 
                                 var ncfTypeOption = $("<option>");
@@ -235,7 +235,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     return;
                 }
 
-                var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantityStr, item.product.taxes_id[0]);
+                var fiscalItem = new neotec_interface_models.Item(itemType ,item.product.display_name, item.price, item.quantity, item.product.taxes_id[0]);
 
                 invoice.items.push(fiscalItem);
 
@@ -257,11 +257,10 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
             if(client != null)
             {
-
                 ResPartner.query(['ncf_type_id']).filter([['id','=',client.id]]).first().then(function(partner){
                     var ncfType = partner.ncf_type_id; //0: Id, 1: Name
 
-                    invoice.client = new neotec_interface_models.Client(client.name, client.vat);
+                    invoice.client = new neotec_interface_models.Client(client.name, client.vat, client.phone);
                     ncf.ncfTypeId = ncfType[0];
                     invoice.ncf = ncf;
 
@@ -346,24 +345,29 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
         var client = posmodel.get_client();
         var clientAddress = null;
+        var order = posmodel.get_order();
 
         if(client)
         {
            clientAddress = client.street;
         }
 
-        if (posmodel.get_order().delivery_address != undefined)
+        if (order != null)
         {
-            clientAddress = posmodel.get_order().delivery_address;
+            if (order.delivery_address != undefined)
+            {
+                clientAddress = order.delivery_address;
+            }
+
+            window.posmodel.gui.show_popup('textarea',{
+                'title': 'Dirección de Entrega',
+                'value': clientAddress || '',
+                'confirm': function(value){
+                    order.delivery_address = value;
+                }
+            });
         }
 
-        window.posmodel.gui.show_popup('textarea',{
-            'title': 'Dirección de Entrega',
-            'value': clientAddress || '',
-            'confirm': function(value){
-                posmodel.get_order().delivery_address = value;
-            }
-        });
     };
 
     var CreditNoteValidateWidget = PopupWidget.extend({
@@ -390,28 +394,33 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
             PosOrder.query(['id','pos_reference','legal_tip']).filter([['ncf', '=', ncf]]).first().then(function(order){
 
-                PosOrderLine.query(['id','product_id','price_unit','qty','price_subtotal_incl', 'price_with_tax', 'tax_ids']).filter([['order_id','=', order.id]]).all().then(function(orderLines){
+                if (order != null)
+                {
 
-                    var total = 0;
+                    PosOrderLine.query(['id','product_id','price_unit','qty','price_subtotal_incl', 'price_with_tax', 'tax_ids']).filter([['order_id','=', order.id]]).all().then(function(orderLines){
 
-                    _.each(orderLines, function(orderLine){
-                        orderLine.product = orderLine.product_id[1];
-                        total += orderLine.price_unit * orderLine.qty;
+                        var total = 0;
+
+                        _.each(orderLines, function(orderLine){
+                            orderLine.product = orderLine.product_id[1];
+                            total += orderLine.price_unit * orderLine.qty;
+                        });
+
+                        order.orderLines = orderLines;
+
+                        if(isChargingLegalTip)
+                        {
+                            self.legalTip  = total * 0.10;
+                        }
+
+                        if(callback)
+                        {
+                            callback(order);
+                        }
+
                     });
 
-                    order.orderLines = orderLines;
-
-                    if(isChargingLegalTip)
-                    {
-                        self.legalTip  = total * 0.10;
-                    }
-
-                    if(callback)
-                    {
-                        callback(order);
-                    }
-
-                });
+                }
 
             });
 
@@ -521,8 +530,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 $selectedItem = $($selectedItem);
 
                 var description = $selectedItem.children().eq(0).text();
-                var qty = $selectedItem.children().eq(1).text();
-                var price = $selectedItem.children().eq(2).attr('price').split(' ')[0];
+                var qty = Number.parseFloat($selectedItem.children().eq(1).text());
+                var price = Number.parseFloat($selectedItem.children().eq(2).attr('price').split(' ')[0]);
                 var taxId = Number.parseInt($selectedItem.children().eq(2).attr('tax-id'));
                 var orderLineId = Number.parseInt($selectedItem.attr('orderline-id'));
 
