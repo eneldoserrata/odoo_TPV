@@ -166,6 +166,17 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         }
     });
 
+    screens.ReceiptScreenWidget.include({
+
+        show: function(){
+            this._super();
+
+            // disables next button until order is send to the server
+            $('.receipt-screen .top-content .button').attr('disabled','disabled');
+        }
+
+    });
+
     // Change Order get_total_with_tax return if legal tip is enabled
     posModels.Order.prototype.get_total_with_tax = function() {
 
@@ -182,11 +193,63 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         return this.get_total_without_tax() + this.get_total_tax();
     };
 
-    posModels.Order.prototype.finalize = function() {
+    posModels.PosModel.prototype._save_to_server = function (orders, options) {
+        if (!orders || !orders.length) {
+            var result = $.Deferred();
+            result.resolve([]);
+            return result;
+        }
 
-        validateFiscalInvoice();
+        options = options || {};
 
-        this.destroy();
+        var self = this;
+        var timeout = typeof options.timeout === 'number' ? options.timeout : 7500 * orders.length;
+
+        // we try to send the order. shadow prevents a spinner if it takes too long. (unless we are sending an invoice,
+        // then we want to notify the user that we are waiting on something )
+        var posOrderModel = new Model('pos.order');
+        return posOrderModel.call('create_from_ui',
+            [_.map(orders, function (order) {
+                order.to_invoice = options.to_invoice || false;
+                return order;
+            })],
+            undefined,
+            {
+                shadow: !options.to_invoice,
+                timeout: timeout
+            }
+        ).then(function (server_ids) {
+
+            _.each(orders, function (order) {
+                self.db.remove_order(order.id);
+            });
+            self.set('failed',false);
+
+            // Send Fiscal Invoice
+            validateFiscalInvoice();
+
+            return server_ids;
+        }).fail(function (error, event){
+            if(error.code === 200 ){    // Business Logic Error, not a connection problem
+                //if warning do not need to display traceback!!
+                if (error.data.exception_type == 'warning') {
+                    delete error.data.debug;
+                }
+
+                // Hide error if already shown before ...
+                if ((!self.get('failed') || options.show_error) && !options.to_invoice) {
+                    self.gui.show_popup('error-traceback',{
+                        'title': error.data.message,
+                        'body':  error.data.debug
+                    });
+                }
+                self.set('failed',error)
+            }
+            // prevent an error popup creation by the rpc failure
+            // we want the failure to be silent as we send the orders in the background
+            event.preventDefault();
+            console.error('Failed to send orders:', orders);
+        });
     };
 
     var validateFiscalInvoice = function () {
@@ -265,7 +328,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     invoice.ncf = ncf;
 
                     FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
-                        //do nothing
+                        // Eneables next button after order is send to the server
+                        $('.receipt-screen .top-content .button').removeAttr("disabled");
                     });
 
                 });
@@ -279,7 +343,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     invoice.ncf = ncf;
 
                     FiscalPrinter.call("register_invoice", [invoice]).then(function (res) {
-                        //do nothing
+                        // Eneables next button after order is send to the server
+                        $('.receipt-screen .top-content .button').removeAttr("disabled");
                     });
 
                 });

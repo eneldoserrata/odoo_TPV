@@ -78,3 +78,10 @@
 .money-formatted {
     text-align: right !important;
 }
+
+.pos .button[disabled] {
+    pointer-events: none;
+    background: rgb(230, 230, 230) !important;
+    border: solid 1px rgb(209, 209, 209) !important;
+    color: #555555 !important;
+}

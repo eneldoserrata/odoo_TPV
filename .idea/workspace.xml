@@ -2,14 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8d8655a2-fef7-4d7d-9f83-7d955dc998f9" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/neotec_interface/models/models.py" afterPath="$PROJECT_DIR$/neotec_interface/models/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/neotec_interface/neoutil/neoutil.py" afterPath="$PROJECT_DIR$/neotec_interface/neoutil/neoutil.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/neotec_interface/static/src/css/custom_style.css" afterPath="$PROJECT_DIR$/neotec_interface/static/src/css/custom_style.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/neotec_interface/static/src/js/custom_pos.js" afterPath="$PROJECT_DIR$/neotec_interface/static/src/js/custom_pos.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/neotec_interface/static/src/js/models.js" afterPath="$PROJECT_DIR$/neotec_interface/static/src/js/models.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/neotec_interface/views/views.xml" afterPath="$PROJECT_DIR$/neotec_interface/views/views.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../odoo/addons/account/models/account_move.py" afterPath="$PROJECT_DIR$/../odoo/addons/account/models/account_move.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../odoo/addons/hw_escpos/controllers/main.py" afterPath="$PROJECT_DIR$/../odoo/addons/hw_escpos/controllers/main.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../odoo/addons/point_of_sale/point_of_sale.py" afterPath="$PROJECT_DIR$/../odoo/addons/point_of_sale/point_of_sale.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/models.js" afterPath="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/models.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/screens.js" afterPath="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/screens.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../odoo/addons/pos_restaurant/static/src/js/multiprint.js" afterPath="$PROJECT_DIR$/../odoo/addons/pos_restaurant/static/src/js/multiprint.js" />
     </list>
     <ignored path="neotec.iws" />
@@ -34,8 +34,28 @@
       <file leaf-file-name="custom_pos.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neotec_interface/static/src/js/custom_pos.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="195" column="24" selection-start-line="195" selection-start-column="24" selection-end-line="195" selection-end-column="24" />
+            <state relative-caret-position="75">
+              <caret line="167" column="0" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="custom_style.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/neotec_interface/static/src/css/custom_style.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="461">
+              <caret line="81" column="12" selection-start-line="81" selection-start-column="12" selection-end-line="81" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="screens.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/screens.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="262">
+              <caret line="1347" column="22" selection-start-line="1346" selection-start-column="4" selection-end-line="1347" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -53,7 +73,6 @@
         <option value="$PROJECT_DIR$/neotec_interface/data/payment_types.xml" />
         <option value="$PROJECT_DIR$/neotec_interface/__openerp__.py" />
         <option value="$PROJECT_DIR$/neotec_interface/data/ncf_types.xml" />
-        <option value="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/models.js" />
         <option value="$PROJECT_DIR$/TODO.txt" />
         <option value="$PROJECT_DIR$/../odoo/addons/point_of_sale/point_of_sale.py" />
         <option value="$PROJECT_DIR$/../odoo/addons/account/models/account_move.py" />
@@ -67,6 +86,11 @@
         <option value="$PROJECT_DIR$/neotec_interface/neoutil/neoutil.py" />
         <option value="$PROJECT_DIR$/neotec_interface/static/src/js/models.js" />
         <option value="$PROJECT_DIR$/neotec_interface/models/models.py" />
+        <option value="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/gui.js" />
+        <option value="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/screens.js" />
+        <option value="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/xml/pos.xml" />
+        <option value="$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/models.js" />
+        <option value="$PROJECT_DIR$/neotec_interface/static/src/css/custom_style.css" />
         <option value="$PROJECT_DIR$/neotec_interface/static/src/js/custom_pos.js" />
       </list>
     </option>
@@ -102,8 +126,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -118,6 +140,16 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="odoo" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="neotec" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="neotec" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -180,17 +212,19 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="js" />
+              <option name="myItemId" value="css" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../odoo" />
-    <property name="SearchEverywhereHistoryKey" value="models&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/models/models.py&#10;neouti&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/neoutil/neoutil.py&#10;ne&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/neoutil/neoutil.py&#10;custom&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/static/src/js/custom_pos.js&#10;neo&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/neoutil/neoutil.py&#10;point&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/odoo/addons/point_of_sale/point_of_sale.py&#10;todo&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/TODO.txt&#10;pointo&#9;null&#9;null&#10;model&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/models/models.py" />
+    <property name="SearchEverywhereHistoryKey" value="sc&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/odoo/addons/point_of_sale/static/src/js/screens.js&#10;cu&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/static/src/js/custom_pos.js&#10;models&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/models/models.py&#10;neouti&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/neoutil/neoutil.py&#10;ne&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/neoutil/neoutil.py&#10;custom&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/static/src/js/custom_pos.js&#10;neo&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/neoutil/neoutil.py&#10;point&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/odoo/addons/point_of_sale/point_of_sale.py&#10;todo&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/TODO.txt&#10;pointo&#9;null&#9;null&#10;model&#9;FILE&#9;file:///home/diego/Documents/Projects/Odoo-Development/neotec/neotec_interface/models/models.py" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="160" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="159" />
@@ -390,13 +424,13 @@
     <frame x="-1" y="30" width="1368" height="739" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1598513" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1866171" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32850242" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32423756" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32744783" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33386838" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26966292" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24981412" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32711622" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -417,9 +451,9 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32423756" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32744783" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33386838" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26966292" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32711622" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1598513" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1866171" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32744783" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -446,76 +480,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file:///usr/lib/python2.7/pprint.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="145">
-          <caret line="55" column="54" selection-start-line="55" selection-start-column="54" selection-end-line="55" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/neotec_interface/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../odoo/openerp/fields.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="1835" column="35" selection-start-line="1835" selection-start-column="35" selection-end-line="1835" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/neotec_interface/data/payment_types.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/neotec_interface/data/ncf_types.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../odoo/openerp/addons/test_impex/tests/test_load.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="193">
-          <caret line="51" column="24" selection-start-line="51" selection-start-column="24" selection-end-line="51" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2016.1/system/python_stubs/-1247972723/datetime.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="162" column="6" selection-start-line="162" selection-start-column="6" selection-end-line="162" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/neotec_interface/demo/demo.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/models.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-326">
-          <caret line="1493" column="35" selection-start-line="1493" selection-start-column="35" selection-end-line="1493" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../odoo/addons/account/models/account_bank_statement.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="376">
-          <caret line="251" column="29" selection-start-line="251" selection-start-column="29" selection-end-line="251" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../odoo/openerp/workflow/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="331">
@@ -779,7 +743,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="73">
           <caret line="14" column="35" selection-start-line="14" selection-start-column="35" selection-end-line="14" selection-end-column="35" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -787,7 +750,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="129">
           <caret line="113" column="4" selection-start-line="113" selection-start-column="4" selection-end-line="113" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -795,14 +757,93 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="583">
           <caret line="148" column="91" selection-start-line="148" selection-start-column="91" selection-end-line="148" selection-end-column="91" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/views/report_payment.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-568">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/xml/pos.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="51" column="38" selection-start-line="51" selection-start-column="20" selection-end-line="51" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/gui.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="173">
+          <caret line="182" column="19" selection-start-line="182" selection-start-column="19" selection-end-line="182" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/chrome.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/popups.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="28" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/widget_base.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="16" column="20" selection-start-line="16" selection-start-column="20" selection-end-line="16" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/models.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="1489" column="13" selection-start-line="1489" selection-start-column="0" selection-end-line="1489" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../odoo/addons/point_of_sale/static/src/js/screens.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="1347" column="22" selection-start-line="1346" selection-start-column="4" selection-end-line="1347" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/neotec_interface/static/src/css/custom_style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="461">
+          <caret line="81" column="12" selection-start-line="81" selection-start-column="12" selection-end-line="81" selection-end-column="12" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/neotec_interface/static/src/js/custom_pos.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="195" column="24" selection-start-line="195" selection-start-column="24" selection-end-line="195" selection-end-column="24" />
+        <state relative-caret-position="75">
+          <caret line="167" column="0" selection-start-line="167" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
           <folding />
         </state>
       </provider>
