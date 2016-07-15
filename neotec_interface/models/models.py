@@ -133,10 +133,11 @@ class FiscalPrinter(models.Model):
 
             invoice['ncfString'] = ncf
 
-            if 'orderReference' in invoice:
-                current_order = self.env['pos.order'].search([('pos_reference', '=', invoice['orderReference'])],
+            if 'orderId' in invoice:
+                current_order = self.env['pos.order'].search([('id', '=', invoice['orderId'])],
                                                              limit=1)
                 fiscal_printer = self.env['neotec_interface.fiscal_printer'].browse(invoice['fiscalPrinterId'])
+
                 current_order.ncf = ncf
                 current_order.using_legal_tip = fiscal_printer.charge_legal_tip
 
@@ -144,7 +145,7 @@ class FiscalPrinter(models.Model):
 
                     if invoice['deliveryAddress']:
                         current_order.is_delivery_order = True
-                        current_order.delivery_address = invoice['deliveryAddress']
+                        current_order.delivery_address = invoice['de    liveryAddress']
 
                         for c in neoutil.split2len('ENTREGA: ' + invoice['deliveryAddress'], 40):
                             invoice['comments'] += c.ljust(40)

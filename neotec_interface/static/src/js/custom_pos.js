@@ -225,12 +225,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             });
             self.set('failed',false);
 
-            // Send Fiscal Invoice
-            validateFiscalInvoice();
+            validateFiscalInvoice(server_ids[0]);
 
             return server_ids;
         }).fail(function (error, event){
-            if(error.code === 200 ){    // Business Logic Error, not a connection problem
+            if(error.code === 200 ){    // Business Logic Erreor, not a connection problem
                 //if warning do not need to display traceback!!
                 if (error.data.exception_type == 'warning') {
                     delete error.data.debug;
@@ -252,7 +251,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         });
     };
 
-    var validateFiscalInvoice = function () {
+    var validateFiscalInvoice = function (orderId) {
 
         var pos = window.posmodel;
 
@@ -262,6 +261,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
         var client = pos.get_client();
         var currentOrder = pos.get_order();
+
         var fiscalPrinterId = pos.config.fiscal_printer_id[0];
         var currentOrderItems = currentOrder.get_orderlines();
 
@@ -277,7 +277,8 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             {
                 invoice.comments = pos.config.receipt_footer.padRight(40, ' ');
             }
-            invoice.orderReference = currentOrder.name; // gets the pos reference for the order
+
+            invoice.orderId = orderId;
             invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
             invoice.deliveryAddress = currentOrder.delivery_address || null;
             ncf.office = fiscalPrinter.ep;

@@ -38,8 +38,5 @@
     'demo': [
         'demo/demo.xml',
     ],
-    'installable': True,
-    'external_dependencies': {
-        'python': ['paramiko']
-    }
+    'installable': True
 }

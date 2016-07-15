@@ -2,7 +2,6 @@
 This module provides helpers in order to manage fiscal invoices
 """
 import ftplib
-import os
 import traceback
 from ftplib import FTP
 from io import BytesIO
@@ -15,8 +14,11 @@ def send_invoice_to_terminal(formatted_invoice, ftp_conf, remote_path_conf, is_n
 
     try:
 
-        ftp = FTP(host_name)
-        ftp.login(user=username, passwd = password)
+        try:
+            ftp = FTP(host_name)
+            ftp.login(user=username, passwd = password)
+        except AttributeError:
+            return
 
         office_dir = remote_path_conf['path']
         office_invoice_dir = office_dir + '/factura'
