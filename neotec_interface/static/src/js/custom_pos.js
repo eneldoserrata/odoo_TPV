@@ -161,6 +161,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             else
             {
                 this._super();
+                var lTipE = this.el.querySelector('#legalTip');
+
+                if(lTipE) {
+                    lTipE.remove();
+                }
             }
 
         }

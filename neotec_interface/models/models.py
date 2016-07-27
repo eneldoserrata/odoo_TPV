@@ -68,9 +68,12 @@ class FiscalPrinter(models.Model):
                     tax_amount = tax.amount
                 if tax_amount == 0:  # no tax applicable for this item
                     tax_amount = 1000
+
+                final_price = item['price'] + (item['price'] * (tax_amount / 100))
+
                 item['tax'] = str(tax_amount).replace('.', '') + '0'
                 item['quantity'] = '{:.3f}'.format(item['quantity']).replace('.', '').replace(',','')
-                item['price'] = '{:.2f}'.format(item['price']).replace('.', '').replace(',','')
+                item['price'] = '{:.2f}'.format(final_price).replace('.', '').replace(',','')
                 item['type'] = str(item['type'])
 
             for payment in invoice['payments']:
