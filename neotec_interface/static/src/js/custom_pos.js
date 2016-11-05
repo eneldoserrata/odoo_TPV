@@ -23,6 +23,9 @@ odoo.define('neotec_interface.custom_pos', function (require) {
 
             $('#credit_note_option').click(doCreditNote);
             $('#delivery_option').click(doDelivery);
+            $('#takeout_option').click(doTakeout);
+
+            disableChangePrice();
         }
 
     });
@@ -137,6 +140,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                     $('#legalTip').hide();
                 }
             }
+
         },
 
         update_summary: function() {
@@ -168,6 +172,11 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 }
             }
 
+        },
+        change_selected_order: function() {
+            this._super();
+            checkDelivery();
+            checkTakeout();
         }
     });
 
@@ -256,6 +265,12 @@ odoo.define('neotec_interface.custom_pos', function (require) {
         });
     };
 
+    posModels.PosModel.prototype.set_cashier = function(user){
+        this.cashier = user;
+
+        disableChangePrice();
+    }
+
     var validateFiscalInvoice = function (orderId) {
 
         var pos = window.posmodel;
@@ -286,6 +301,7 @@ odoo.define('neotec_interface.custom_pos', function (require) {
             invoice.orderId = orderId;
             invoice.legalTenPercent = (fiscalPrinter.charge_legal_tip) ? '1' : '0';
             invoice.deliveryAddress = currentOrder.delivery_address || null;
+            invoice.is_takeout_order = currentOrder.is_takeout_order || false;
             ncf.office = fiscalPrinter.ep;
             ncf.box = fiscalPrinter.ia;
             ncf.bd = fiscalPrinter.bd;
@@ -435,9 +451,61 @@ odoo.define('neotec_interface.custom_pos', function (require) {
                 'value': clientAddress || '',
                 'confirm': function(value){
                     order.delivery_address = value;
+                    checkDelivery();
                 }
             });
         }
+
+    };
+
+    var doTakeout = function(){
+
+        var order = posmodel.get_order();
+
+        if (order != null)
+        {
+           if(order.is_takeout_order) {
+                order.is_takeout_order = false;
+           }
+           else
+           {
+                order.is_takeout_order = true;
+           }
+
+           checkTakeout();
+        }
+
+    };
+
+    var checkDelivery = function() {
+
+       var order = posmodel.get_order();
+
+       if(order) {
+           if(order.delivery_address) {
+                $('#delivery_option > i').addClass('oe_green').removeClass('oe_orange');
+           }
+           else
+           {
+                $('#delivery_option > i').addClass('oe_orange').removeClass('oe_green');
+           }
+       }
+
+    };
+
+    var checkTakeout = function() {
+
+       var order = posmodel.get_order();
+
+       if(order) {
+           if(order.is_takeout_order) {
+                $('#takeout_option > i').addClass('oe_green').removeClass('oe_orange');
+           }
+           else
+           {
+                $('#takeout_option > i').addClass('oe_orange').removeClass('oe_green');
+           }
+       }
 
     };
 
@@ -710,5 +778,20 @@ odoo.define('neotec_interface.custom_pos', function (require) {
     });
 
     gui.define_popup({name:'creditnote', widget: CreditNotePopupWidget});
+
+
+    var disableChangePrice = function() {
+        var cashier = posmodel.get_cashier();
+
+        var changePriceBtn = $('button[data-mode=price]');
+
+        if(cashier.role == 'manager') {
+            changePriceBtn.css('display', 'inline-block');
+        }
+        else
+        {
+            changePriceBtn.css('display', 'none');
+        }
+    };
 
 });

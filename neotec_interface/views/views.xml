@@ -130,6 +130,7 @@
             <field name="ncf"/>
             <field name="using_legal_tip"/>
             <field name="is_delivery_order"/>
+            <field name="is_takeout_order"/>
         </field>
         <field name="amount_tax" position="after">
             <field name="legal_tip" attrs="{'invisible':[('using_legal_tip', '==', False)]}"/>

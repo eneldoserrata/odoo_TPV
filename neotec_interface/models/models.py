@@ -148,7 +148,7 @@ class FiscalPrinter(models.Model):
 
                     if invoice['deliveryAddress']:
                         current_order.is_delivery_order = True
-                        current_order.delivery_address = invoice['de    liveryAddress']
+                        current_order.delivery_address = invoice['deliveryAddress']
 
                         for c in neoutil.split2len('ENTREGA: ' + invoice['deliveryAddress'], 40):
                             invoice['comments'] += c.ljust(40)
@@ -156,6 +156,9 @@ class FiscalPrinter(models.Model):
                         if invoice['client']['phone'] != '':
                             for c in neoutil.split2len('TELEFONO: ' + invoice['client']['phone'], 40):
                                 invoice['comments'] += c.ljust(40)
+
+                    if invoice['is_takeout_order']:
+                        current_order.is_takeout_order = True
 
             if invoice['referenceNcf'] != '':
 
@@ -311,7 +314,8 @@ class CustomPosOrder(models.Model):
     _inherit = 'pos.order'
 
     ncf = fields.Char(string="NCF", readonly=True)
-    is_delivery_order = fields.Boolean(string="Orden Domicilio")
+    is_delivery_order = fields.Boolean(string="Orden Domicilio", readonly=True)
+    is_takeout_order = fields.Boolean(string="Para LLevar", readonly=True)
     delivery_address = fields.Char(string=u"Dirección")
     using_legal_tip = fields.Boolean(string='Incluir Propina Legal', readonly=True)
     legal_tip = fields.Float(string="Propina legal (10%)", compute='_calculate_legal_tip')
@@ -569,7 +573,6 @@ class CustomLegacyPosOrder(osv.osv):
                                        readonly=True, digits=0, multi='all'),
         'amount_return': oldFields.function(_amount_all, string='Returned', digits=0, multi='all'),
     }
-
 
 class CustomPosOrderLine(models.Model):
     _name = 'pos.order.line'
